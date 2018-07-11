@@ -68,6 +68,24 @@ var Engine = (function(global) {
         main();
     }
 
+    // This function implements collision detection on entities
+    function checkCollisions() {
+        allEnemies.forEach(function(enemy) {
+            const enemySquare = {x: Math.floor(enemy.x), y: enemy.y, width: 91, height: 70};
+            const playerSquare = {x: player.x, y: player.y, width: 68, height: 70};
+
+            // Thanks to MDN!
+            // https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
+            if (enemySquare.x < playerSquare.x + playerSquare.width &&
+                enemySquare.x + enemySquare.width > playerSquare.x &&
+                enemySquare.y < playerSquare.y + playerSquare.height &&
+                enemySquare.height + enemySquare.y > playerSquare.y) {
+                player.x = 202;
+                player.y = 404;
+            }
+        });
+    }
+
     /* This function is called by main (our game loop) and itself calls all
      * of the functions which may need to update entity's data. Based on how
      * you implement your collision detection (when two entities occupy the
@@ -79,7 +97,7 @@ var Engine = (function(global) {
      */
     function update(dt) {
         updateEntities(dt);
-        // checkCollisions();
+        checkCollisions();
     }
 
     /* This is called by the update function and loops through all of the
