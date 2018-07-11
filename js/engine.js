@@ -71,8 +71,8 @@ var Engine = (function(global) {
     // This function implements collision detection on entities
     function checkCollisions() {
         allEnemies.forEach(function(enemy) {
-            const enemySquare = {x: Math.floor(enemy.x), y: enemy.y, width: 91, height: 70};
-            const playerSquare = {x: player.x, y: player.y, width: 68, height: 70};
+            const enemySquare = {x: Math.floor(enemy.x), y: enemy.y + 75, width: 100, height: 75};
+            const playerSquare = {x: player.x + 35, y: player.y + 75, width: 49, height: 67};
 
             // Thanks to MDN!
             // https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
@@ -81,7 +81,7 @@ var Engine = (function(global) {
                 enemySquare.y < playerSquare.y + playerSquare.height &&
                 enemySquare.height + enemySquare.y > playerSquare.y) {
                 player.x = 202;
-                player.y = 404;
+                player.y = 390;
             }
         });
     }

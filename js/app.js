@@ -43,7 +43,7 @@ var Player = function() {
     this.sprite = 'images/char-boy.png';
 
     this.x = 202;
-    this.y = 404;
+    this.y = 390;
 };
 
 // Required method for the game
