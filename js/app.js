@@ -25,6 +25,11 @@ Enemy.prototype.update = function(dt) {
     // so it updates just the "x" coordinate
     this.x += this.speed * dt;
 
+    // New enemy shows up when an enemy goes out of screen
+    if (this.x >= 505) {
+        allEnemies.splice(allEnemies.indexOf(this), 1, new Enemy(-101, this.y, Math.random()*100));
+    }
+
 };
 
 // Draw the enemy on the screen, required method for game
