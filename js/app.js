@@ -60,9 +60,9 @@ Player.prototype.render = function() {
 // Instantiating all enemy objects
 let allEnemies = [];
 
-for (i = 1; i <= 3; i++) {
-    allEnemies.push(new Enemy(-101, 90*i, Math.random()*100))
-}
+allEnemies.push(new Enemy(-101, 63, Math.random()*100));
+allEnemies.push(new Enemy(-101, 146, Math.random()*100));
+allEnemies.push(new Enemy(-101, 229, Math.random()*100));
 
 // Instantiating the player object
 let player = new Player();
