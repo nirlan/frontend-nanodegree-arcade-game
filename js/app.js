@@ -27,9 +27,8 @@ Enemy.prototype.update = function(dt) {
 
     // New enemy shows up when an enemy goes out of screen
     if (this.x >= 505) {
-        allEnemies.splice(allEnemies.indexOf(this), 1, new Enemy(-101, this.y, Math.random()*100));
+        allEnemies.splice(allEnemies.indexOf(this), 1, new Enemy(-101, this.y, speedGen()));
     }
-
 };
 
 // Draw the enemy on the screen, required method for game
@@ -62,12 +61,15 @@ Player.prototype.render = function() {
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
 
+// Enemy random speed generator
+let speedGen = () => 80 + Math.random()*200;
+
 // Instantiating all enemy objects
 let allEnemies = [];
 
-allEnemies.push(new Enemy(-101, 63, Math.random()*100));
-allEnemies.push(new Enemy(-101, 146, Math.random()*100));
-allEnemies.push(new Enemy(-101, 229, Math.random()*100));
+allEnemies.push(new Enemy(-101, 63, speedGen()));
+allEnemies.push(new Enemy(-101, 146, speedGen()));
+allEnemies.push(new Enemy(-101, 229, speedGen()));
 
 // Instantiating the player object
 let player = new Player();
