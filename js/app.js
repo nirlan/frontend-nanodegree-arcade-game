@@ -56,6 +56,24 @@ Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
+// Handle player inputs by checking the pressed key and moving
+// the player around accordingly
+Player.prototype.handleInput = function(movement) {
+    switch (movement) {
+        case 'left':
+            (this.x >= 101) ? this.x -= 101 : this.x;
+            break;
+        case 'up':
+            (this.y >= 83) ? this.y -= 83 : this.y;
+            break;
+        case 'right':
+            (this.x <= 303) ? this.x += 101 : this.x;
+            break;
+        case 'down':
+            (this.y <= 378) ? this.y += 83 : this.y;
+    }
+};
+
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
@@ -73,6 +91,7 @@ allEnemies.push(new Enemy(-101, 229, speedGen()));
 
 // Instantiating the player object
 let player = new Player();
+
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
