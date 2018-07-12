@@ -68,6 +68,7 @@ var Engine = (function(global) {
         main();
     }
 
+
     // This function implements collision detection on entities
     function checkCollisions() {
         allEnemies.forEach(function(enemy) {
@@ -84,6 +85,14 @@ var Engine = (function(global) {
                 player.y = 390;
             }
         });
+    }
+
+    // Create and update the score display
+    function drawScore() {
+        ctx.font = "48px Gaegu";
+        ctx.fillStyle = "#3f87a6";
+        ctx.textBaseline = "hanging";
+        ctx.fillText(`SCORE: ${player.score}`, 8, 15);
     }
 
     /* This function is called by main (our game loop) and itself calls all
@@ -157,6 +166,7 @@ var Engine = (function(global) {
         }
 
         renderEntities();
+        drawScore();
     }
 
     /* This function is called by the render function and is called on each game

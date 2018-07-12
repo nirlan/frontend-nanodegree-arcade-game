@@ -44,6 +44,7 @@ var Player = function() {
 
     this.x = 202;
     this.y = 390;
+    this.score = 0;
 };
 
 // Required method for the game
@@ -60,15 +61,28 @@ Player.prototype.render = function() {
 // the player around accordingly
 Player.prototype.handleInput = function(movement) {
     switch (movement) {
+
         case 'left':
             (this.x >= 101) ? this.x -= 101 : this.x;
             break;
+
         case 'up':
-            (this.y >= 83) ? this.y -= 83 : this.y;
+            if (this.y >= 83) {
+                this.y -= 83;
+
+            // The player gets to the river, it returns to the initial position
+            // and the score is updated
+            } else {
+                this.score++;
+                this.x = 202;
+                this.y = 390;
+            }
             break;
+
         case 'right':
             (this.x <= 303) ? this.x += 101 : this.x;
             break;
+
         case 'down':
             (this.y <= 378) ? this.y += 83 : this.y;
     }
