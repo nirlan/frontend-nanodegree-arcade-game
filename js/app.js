@@ -45,6 +45,7 @@ var Player = function() {
     this.x = 202;
     this.y = 390;
     this.score = 0;
+    this.lives = 3;
 };
 
 // Required method for the game

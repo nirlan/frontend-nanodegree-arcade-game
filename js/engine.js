@@ -69,7 +69,9 @@ var Engine = (function(global) {
     }
 
 
-    // This function implements collision detection on entities
+    // This function implements collision detection on entities,
+    // if the player collides, the lives are updated and it returns to
+    // the initial position
     function checkCollisions() {
         allEnemies.forEach(function(enemy) {
             const enemySquare = {x: Math.floor(enemy.x), y: enemy.y + 75, width: 100, height: 75};
@@ -83,16 +85,25 @@ var Engine = (function(global) {
                 enemySquare.height + enemySquare.y > playerSquare.y) {
                 player.x = 202;
                 player.y = 390;
+                player.lives--;
             }
         });
     }
 
-    // Create and update the score display
+    // Create the score and lives display
     function drawScore() {
         ctx.font = "48px Gaegu";
         ctx.fillStyle = "#3f87a6";
         ctx.textBaseline = "hanging";
-        ctx.fillText(`SCORE: ${player.score}`, 8, 15);
+        ctx.fillText(`SCORE: ${player.score}`, 2, 15);
+        ctx.fillText('LIVES:', 240, 15);
+
+        // Each player's life draws a heart on the display
+        let n = 390;
+        for (let i = player.lives; i > 0; i--) {
+           ctx.drawImage(Resources.get('images/heart-small.png'), n, 15);
+           n += 40;
+        }
     }
 
     /* This function is called by main (our game loop) and itself calls all
@@ -201,7 +212,8 @@ var Engine = (function(global) {
         'images/water-block.png',
         'images/grass-block.png',
         'images/enemy-bug.png',
-        'images/char-boy.png'
+        'images/char-boy.png',
+        'images/heart-small.png'
     ]);
     Resources.onReady(init);
 
