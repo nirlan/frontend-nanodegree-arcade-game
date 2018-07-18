@@ -89,6 +89,28 @@ Player.prototype.handleInput = function(movement) {
     }
 };
 
+// Handle player's inputs from the keyboard regarding the screen:
+    // option selection on the start screen, pause, mute, and restart the game
+    let enterKey = false; // Enter key pressed
+    let spaceKey = false; // Space key pressed
+    let gameplay = false; // The player is not in the game screen
+
+
+    function handleInput(input) {
+        switch (input) {
+            case 'enter':
+                gameplay = true; // Game screen is running
+                enterKey = true;
+                console.log("I'm listening!");
+                console.log(`Enter key = ${enterKey}`);
+                break;
+            case 'space':
+                gameplay = true; // Game screen is running
+                spaceKey = true;
+                console.log("I'm listening!");
+                console.log(`Space key = ${spaceKey}`);
+        }
+    }
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
@@ -107,16 +129,22 @@ allEnemies.push(new Enemy(-101, 229, speedGen()));
 // Instantiating the player object
 let player = new Player();
 
-
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
 document.addEventListener('keyup', function(e) {
     var allowedKeys = {
+        13: 'enter',
+        32: 'space',
         37: 'left',
         38: 'up',
         39: 'right',
-        40: 'down'
+        40: 'down',
+        80: 'pause'
     };
 
-    player.handleInput(allowedKeys[e.keyCode]);
+    if (gameplay === true) {
+        player.handleInput(allowedKeys[e.keyCode]);
+    } else {
+        handleInput(allowedKeys[e.keyCode]);
+    }
 });

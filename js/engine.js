@@ -22,7 +22,10 @@ var Engine = (function(global) {
         win = global.window,
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
-        lastTime;
+        lastTime,
+        requestId, // My requested animation frame ID
+        now,
+        dt; // Time delta information
 
     canvas.width = 505;
     canvas.height = 606;
@@ -32,30 +35,39 @@ var Engine = (function(global) {
      * and handles properly calling the update and render methods.
      */
     function main() {
+
         /* Get our time delta information which is required if your game
          * requires smooth animation. Because everyone's computer processes
          * instructions at different speeds we need a constant value that
          * would be the same for everyone (regardless of how fast their
          * computer is) - hurray time!
          */
-        var now = Date.now(),
-            dt = (now - lastTime) / 1000.0;
+        now = Date.now();
+        dt = (now - lastTime) / 1000.0;
+
+        if (gameplay === false && player.lives === 3) {
+            updateStartScreen(dt);
+            renderStartScreen();
+        }
 
         /* Call our update/render functions, pass along the time delta to
          * our update function since it may be used for smooth animation.
          */
-        update(dt);
-        render();
+        if (gameplay === true && player.lives !== 0) {
+            update(dt);
+            render();
+        }
 
         /* Set our lastTime variable which is used to determine the time delta
          * for the next time this function is called.
          */
         lastTime = now;
 
+
         /* Use the browser's requestAnimationFrame function to call this
          * function again as soon as the browser is able to draw another frame.
          */
-        win.requestAnimationFrame(main);
+        requestId = win.requestAnimationFrame(main);
     }
 
     /* This function does some initial setup that should only occur once,
@@ -68,7 +80,6 @@ var Engine = (function(global) {
         main();
     }
 
-
     // This function implements collision detection on entities,
     // if the player collides, the lives are updated and it returns to
     // the initial position
@@ -77,12 +88,13 @@ var Engine = (function(global) {
             const enemySquare = {x: Math.floor(enemy.x), y: enemy.y + 75, width: 100, height: 75};
             const playerSquare = {x: player.x + 35, y: player.y + 75, width: 49, height: 67};
 
-            // Thanks to MDN!
+            // Thanks to MDN! - 2D collision detection algorithm
             // https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
             if (enemySquare.x < playerSquare.x + playerSquare.width &&
                 enemySquare.x + enemySquare.width > playerSquare.x &&
                 enemySquare.y < playerSquare.y + playerSquare.height &&
                 enemySquare.height + enemySquare.y > playerSquare.y) {
+
                 player.x = 202;
                 player.y = 390;
                 player.lives--;
@@ -134,6 +146,29 @@ var Engine = (function(global) {
         player.update();
     }
 
+    // Update the start screen
+    function updateStartScreen(dt) {
+        if (enterKey === true || spaceKey === true) {
+            screenNum = 1;
+            console.log(`I'm listening (updateStartScreen) ${enterKey} + ${spaceKey}
+                         screenNum = ${screenNum}`);
+            enterKey = false;
+            spaceKey = false;
+            win.cancelAnimationFrame(requestId);
+            requestId = undefined;
+        }
+    }
+
+    // Update credits screen
+    function updateCreditScreen(dt) {
+
+    }
+
+    // Update game over screen
+    function updateGameOverScreen(dt) {
+
+    }
+
     /* This function initially draws the "game level", it will then call
      * the renderEntities function. Remember, this function is called every
      * game tick (or loop of the game engine) because that's how games work -
@@ -178,6 +213,11 @@ var Engine = (function(global) {
 
         renderEntities();
         drawScore();
+
+        if (player.lives === 0) {
+            win.cancelAnimationFrame(requestId);
+            gameOverScreen();
+        }
     }
 
     /* This function is called by the render function and is called on each game
@@ -195,12 +235,114 @@ var Engine = (function(global) {
         player.render();
     }
 
+    // Render the start screen
+    function renderStartScreen() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+
+        ctx.font = "68px Gaegu";
+        ctx.fillStyle = "#436ba8";
+        ctx.textBaseline = "hanging";
+        ctx.fillText('Get to the RIVER', 0, 200);
+
+        ctx.font = "48px Gaegu";
+        ctx.fillStyle = "#436ba8";
+        ctx.textBaseline = "hanging";
+        ctx.fillText('NEW GAME', 10, 300);
+
+        ctx.font = "48px Gaegu";
+        ctx.fillStyle = "#436ba8";
+        ctx.textBaseline = "hanging";
+        ctx.fillText('CREDITS', 10, 400);
+    }
+
+    //Render the credits screen
+    function renderCreditScreeen() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+
+        ctx.font = "68px Gaegu";
+        ctx.fillStyle = "#436ba8";
+        ctx.textBaseline = "hanging";
+        ctx.fillText('CREDITS', 10, 200);
+
+        ctx.font = "48px Gaegu";
+        ctx.fillStyle = "#436ba8";
+        ctx.textBaseline = "hanging";
+        ctx.fillText('Author: Nirlan Souza', 10, 300);
+    }
+
+    //Render the game over screen
+    function renderGameOverScreen() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+
+        ctx.font = "68px Gaegu";
+        ctx.fillStyle = "#436ba8";
+        ctx.textBaseline = "hanging";
+        ctx.fillText('GAME OVER', 10, 200);
+
+        ctx.font = "48px Gaegu";
+        ctx.fillStyle = "#436ba8";
+        ctx.textBaseline = "hanging";
+        ctx.fillText('TRY AGAIN!', 10, 300);
+    }
+
+    // Display the Start screen
+    //function startScreen() {
+        /* Get our time delta information which is required if your game
+         * requires smooth animation. Because everyone's computer processes
+         * instructions at different speeds we need a constant value that
+         * would be the same for everyone (regardless of how fast their
+         * computer is) - hurray time!
+         */
+        // now = Date.now();
+        // dt = (now - lastTime) / 1000.0;
+
+        // updateStartScreen(dt);
+        // renderStartScreen();
+
+        // lastTime = now;
+        // requestId = win.requestAnimationFrame(startScreen);
+    //}
+
+    // Display the Game Over screen
+    function gameOverScreen() {
+        now = Date.now();
+        dt = (now - lastTime) / 1000.0;
+
+        updateGameOverScreen(dt);
+        renderGameOverScreen();
+
+        lastTime = now;
+
+
+        /* Use the browser's requestAnimationFrame function to call this
+         * function again as soon as the browser is able to draw another frame.
+         */
+        requestId = win.requestAnimationFrame(gameOverScreen);
+    };
+
+    // Display the Credits screen
+    function creditScreen() {
+        now = Date.now();
+        dt = (now - lastTime) / 1000.0;
+
+        updateCreditScreen(dt);
+        renderCreditScreen();
+
+        lastTime = now;
+
+
+        /* Use the browser's requestAnimationFrame function to call this
+         * function again as soon as the browser is able to draw another frame.
+         */
+        requestId = win.requestAnimationFrame(creditScreen);
+    }
+
     /* This function does nothing but it could have been a good place to
      * handle game reset states - maybe a new game menu or a game over screen
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        // noop
+
     }
 
     /* Go ahead and load all of the images we know we're going to need to
