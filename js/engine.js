@@ -65,9 +65,8 @@ var Engine = (function(global) {
          * our update function since it may be used for smooth animation.
          */
 
-        // If gameplay is false and player's lives is equal to 3 the Start
-        // screen is displayed
-        if (gameplay === false && player.lives === 3) {
+        // If startScreen is 'true', the Start screen is displayed
+        if (startScreen === true) {
             updateStartScreen(dt);
             renderStartScreen();
         }
@@ -75,7 +74,7 @@ var Engine = (function(global) {
         // After the new game button is pressed, the gameplay variable is
         // assigned to 'true' and the Game screen is displayed as long as
         // the player's lives is different from zero
-        if (gameplay === true && player.lives !== 0) {
+        if (gameplay === true && gameOver === false) {
             update(dt);
             render();
         }
@@ -86,32 +85,57 @@ var Engine = (function(global) {
             renderCreditScreen();
 
             // Exits Credit screen if the user hits 'enter' or 'space' keys
-            if ((enterKey === true || spaceKey === true) && credits === true) {
+            if (enterKey === true || spaceKey === true) {
                 enterKey = false;
                 spaceKey = false;
                 credits = false;
-                console.log(`${credits}`);
+                startScreen = true;
             }
         }
 
         // If 'enter' or 'space' keys are pressed, the Start screen animation
         // frame stops
-        // If the New Game button is glowing - colorArr[0] !== "#436ba8 -
+        // If the New Game button was glowing - colorArr[0] !== "#436ba8 -
         // the game starts
-        if ((enterKey === true || spaceKey === true) && colorArr[0] !== "#436ba8") {
-            console.log(`I'm listening (updateStartScreen) ${enterKey} + ${spaceKey}`);
+        if ((enterKey === true || spaceKey === true) && colorArr[0] !== "#436ba8"
+            && gameOver === false) {
             enterKey = false;
             spaceKey = false;
+            startScreen = false;
             gameplay = true;
 
-        // Else, if the Credits button is glowing - colorArr[0] === "#436ba8 -
+        // If the Credits button was glowing instead - colorArr[0] === "#436ba8 -
         // the credits variable is assigned to 'true', and hence the Credits
         // screen is displayed
         } else if ((enterKey === true || spaceKey === true) && colorArr[0] === "#436ba8"
                    && credits === false) {
             enterKey = false;
             spaceKey = false;
+            startScreen = false;
             credits = true;
+        }
+
+        // When the player's lives reaches zero, the Game Over screen is
+        // displayed
+        if (player.lives === 0) {
+            gameplay = false;
+            gameOver = true;
+            player = new Player();
+        }
+
+        if (gameOver === true) {
+            updateGameOverScreen(dt);
+            renderGameOverScreen();
+
+            console.log(`I'm listening! (gameOverScreen) ${gameOver}`);
+        }
+
+        if ((enterKey === true || spaceKey === true) && gameOver === true) {
+                enterKey = false;
+                spaceKey = false;
+                gameOver = false;
+                console.log(`I'm listening! (gameOverScreen) ${gameOver}`);
+                startScreen = true;
         }
 
         /* Set our lastTime variable which is used to determine the time delta
@@ -254,8 +278,6 @@ var Engine = (function(global) {
             downKey = false;
             rightKey = false;
             i++;
-            console.log(`I'm listening!!! ${colorArr[0]}`);
-            console.log(`I'm listening!!! ${colorArr[1]}`);
         }
     }
 
@@ -313,13 +335,6 @@ var Engine = (function(global) {
 
         renderEntities();
         drawScore();
-
-        // When the player's lives reaches zero, the Game Over screen is
-        // displayed
-        if (player.lives === 0) {
-            win.cancelAnimationFrame(requestId);
-            gameOverScreen();
-        }
     }
 
     /* This function is called by the render function and is called on each game
@@ -386,41 +401,6 @@ var Engine = (function(global) {
         ctx.fillStyle = "#436ba8";
         ctx.textBaseline = "hanging";
         ctx.fillText('TRY AGAIN!', 10, 300);
-    }
-
-    // Display the Game Over screen
-    function gameOverScreen() {
-        now = Date.now();
-        dt = (now - lastTime) / 1000.0;
-
-        updateGameOverScreen(dt);
-        renderGameOverScreen();
-
-        lastTime = now;
-
-
-        /* Use the browser's requestAnimationFrame function to call this
-         * function again as soon as the browser is able to draw another frame.
-         */
-        requestId = win.requestAnimationFrame(gameOverScreen);
-    };
-
-    // Display the Credits screen
-    function creditScreen() {
-        now = Date.now();
-        dt = (now - lastTime) / 1000.0;
-
-        updateCreditScreen(dt);
-        renderCreditScreen();
-        console.log(`I'm listening!!! (creditScreen)`);
-
-        lastTime = now;
-
-
-        /* Use the browser's requestAnimationFrame function to call this
-         * function again as soon as the browser is able to draw another frame.
-         */
-        //requestId = win.requestAnimationFrame(creditScreen);
     }
 
     /* This function does nothing but it could have been a good place to

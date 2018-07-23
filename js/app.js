@@ -105,8 +105,14 @@ Player.prototype.handleInput = function(movement) {
     // or the 'enter' key is pressed on the Start screen.
     let gameplay = false;
 
+    // Controls if the Start screen is the current screen
+    let startScreen = true;
+
     // This variable controls if the Credits screen is the current screen
     let credits = false;
+
+    // Controls if the Game Over screen is the current screen
+    let gameOver = false;
 
     // This method handle the user's inputs fom the keyboard when the Game screen
     // is not running
