@@ -84,6 +84,14 @@ var Engine = (function(global) {
         if (credits === true) {
             updateCreditScreen(dt);
             renderCreditScreen();
+
+            // Exits Credit screen if the user hits 'enter' or 'space' keys
+            if ((enterKey === true || spaceKey === true) && credits === true) {
+                enterKey = false;
+                spaceKey = false;
+                credits = false;
+                console.log(`${credits}`);
+            }
         }
 
         // If 'enter' or 'space' keys are pressed, the Start screen animation
@@ -99,7 +107,8 @@ var Engine = (function(global) {
         // Else, if the Credits button is glowing - colorArr[0] === "#436ba8 -
         // the credits variable is assigned to 'true', and hence the Credits
         // screen is displayed
-        } else if ((enterKey === true || spaceKey === true) && colorArr[0] === "#436ba8") {
+        } else if ((enterKey === true || spaceKey === true) && colorArr[0] === "#436ba8"
+                   && credits === false) {
             enterKey = false;
             spaceKey = false;
             credits = true;
