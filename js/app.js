@@ -105,23 +105,20 @@ Player.prototype.handleInput = function(movement) {
     // or the 'enter' key is pressed on the Start screen.
     let gameplay = false;
 
+    // This variable controls if the Credits screen is the current screen
+    let credits = false;
+
     // This method handle the user's inputs fom the keyboard when the Game screen
     // is not running
     function handleInput(input) {
         switch (input) {
 
             case 'enter':
-                gameplay = true; // Gameplay variable controls if the game is running
                 enterKey = true;
-                console.log("I'm listening!");
-                console.log(`Enter key = ${enterKey}`);
                 break;
 
             case 'space':
-                gameplay = true; // Gameplay variable controls if the game is running
                 spaceKey = true;
-                console.log("I'm listening!");
-                console.log(`Space key = ${spaceKey}`);
                 break;
 
             case 'left':

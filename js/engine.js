@@ -80,6 +80,31 @@ var Engine = (function(global) {
             render();
         }
 
+        // If credits variable is 'true', the Credits screen is shown
+        if (credits === true) {
+            updateCreditScreen(dt);
+            renderCreditScreen();
+        }
+
+        // If 'enter' or 'space' keys are pressed, the Start screen animation
+        // frame stops
+        // If the New Game button is glowing - colorArr[0] !== "#436ba8 -
+        // the game starts
+        if ((enterKey === true || spaceKey === true) && colorArr[0] !== "#436ba8") {
+            console.log(`I'm listening (updateStartScreen) ${enterKey} + ${spaceKey}`);
+            enterKey = false;
+            spaceKey = false;
+            gameplay = true;
+
+        // Else, if the Credits button is glowing - colorArr[0] === "#436ba8 -
+        // the credits variable is assigned to 'true', and hence the Credits
+        // screen is displayed
+        } else if ((enterKey === true || spaceKey === true) && colorArr[0] === "#436ba8") {
+            enterKey = false;
+            spaceKey = false;
+            credits = true;
+        }
+
         /* Set our lastTime variable which is used to determine the time delta
          * for the next time this function is called.
          */
@@ -170,8 +195,8 @@ var Engine = (function(global) {
 
     // Update the start screen
     function updateStartScreen(dt) {
-
         // The red component ranges from 0 to 255, then from 255 to 0
+        // Give a red 'glowing' effect
         function changeRed() {
             if (hue >= 255) {
                 direction = -1;
@@ -222,18 +247,6 @@ var Engine = (function(global) {
             i++;
             console.log(`I'm listening!!! ${colorArr[0]}`);
             console.log(`I'm listening!!! ${colorArr[1]}`);
-        }
-
-        // If 'enter' or 'space' keys are pressed, the Start screen animation
-        // frame stops
-        if (enterKey === true || spaceKey === true) {
-            screenNum = 1;
-            console.log(`I'm listening (updateStartScreen) ${enterKey} + ${spaceKey}
-                         screenNum = ${screenNum}`);
-            enterKey = false;
-            spaceKey = false;
-            win.cancelAnimationFrame(requestId);
-            requestId = undefined;
         }
     }
 
@@ -336,7 +349,7 @@ var Engine = (function(global) {
     }
 
     // Render the credits screen
-    function renderCreditScreeen() {
+    function renderCreditScreen() {
         ctx.clearRect(0,0,canvas.width,canvas.height);
 
         ctx.font = "68px Gaegu";
@@ -348,6 +361,7 @@ var Engine = (function(global) {
         ctx.fillStyle = "#436ba8";
         ctx.textBaseline = "hanging";
         ctx.fillText('Author: Nirlan Souza', 10, 300);
+
     }
 
     // Render the game over screen
@@ -389,6 +403,7 @@ var Engine = (function(global) {
 
         updateCreditScreen(dt);
         renderCreditScreen();
+        console.log(`I'm listening!!! (creditScreen)`);
 
         lastTime = now;
 
@@ -396,7 +411,7 @@ var Engine = (function(global) {
         /* Use the browser's requestAnimationFrame function to call this
          * function again as soon as the browser is able to draw another frame.
          */
-        requestId = win.requestAnimationFrame(creditScreen);
+        //requestId = win.requestAnimationFrame(creditScreen);
     }
 
     /* This function does nothing but it could have been a good place to
