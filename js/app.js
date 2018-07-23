@@ -89,26 +89,55 @@ Player.prototype.handleInput = function(movement) {
     }
 };
 
-// Handle player's inputs from the keyboard regarding the screen:
-    // option selection on the start screen, pause, mute, and restart the game
-    let enterKey = false; // Enter key pressed
-    let spaceKey = false; // Space key pressed
-    let gameplay = false; // The player is not in the game screen
+    // Handle player's inputs from the keyboard regarding the screen:
+    // these variables controls if any of these keys were pressed,
+    // and hence they permit option selection on the start screen,
+    // pause, mute, and restart the game
+    let enterKey = false; // Enter key pressed (true) / not pressed (false)
+    let spaceKey = false; // Space key pressed (true) / not pressed (false)
+    let leftKey = false; // Left key pressed (true) / not pressed (false)
+    let upKey = false; // Up key pressed (true) / not pressed (false)
+    let rightKey = false; // Right key pressed (true) / not pressed (false)
+    let downKey = false; // Down key pressed (true) / not pressed (false)
 
+    // Gameplay variable controls if the game is running.
+    // The value of this boolean variable is assigned to 'true' when the 'space'
+    // or the 'enter' key is pressed on the Start screen.
+    let gameplay = false;
 
+    // This method handle the user's inputs fom the keyboard when the Game screen
+    // is not running
     function handleInput(input) {
         switch (input) {
+
             case 'enter':
-                gameplay = true; // Game screen is running
+                gameplay = true; // Gameplay variable controls if the game is running
                 enterKey = true;
                 console.log("I'm listening!");
                 console.log(`Enter key = ${enterKey}`);
                 break;
+
             case 'space':
-                gameplay = true; // Game screen is running
+                gameplay = true; // Gameplay variable controls if the game is running
                 spaceKey = true;
                 console.log("I'm listening!");
                 console.log(`Space key = ${spaceKey}`);
+                break;
+
+            case 'left':
+                leftKey = true;
+                break;
+
+            case 'up':
+                upKey = true;
+                break;
+
+            case 'right':
+                rightKey = true;
+                break;
+
+            case 'down':
+                downKey = true;
         }
     }
 
@@ -142,6 +171,11 @@ document.addEventListener('keyup', function(e) {
         80: 'pause'
     };
 
+    // If gameplay variable is 'true', it means the game is
+    // on the Game screen and the keys pressed are sent
+    // to Player.handleInput() method, in order to move the player
+    // accordingly. Else, the game is not on the Game screen, and
+    // the keys are sent to handleInput() method
     if (gameplay === true) {
         player.handleInput(allowedKeys[e.keyCode]);
     } else {

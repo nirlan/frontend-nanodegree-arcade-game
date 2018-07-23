@@ -22,10 +22,26 @@ var Engine = (function(global) {
         win = global.window,
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
+
+        // The 'hue' variable controls the red component of rgb, so the user
+        // can navigate the menu on the Start screen. It permits change the
+        // red component of the selected option. The 'direction' variable shows
+        // if the red component is moving toward red or black.
+        hue = 0,
+        direction = 1,
+        color, // Glowing red
+        colorArr, // An Array with the color codes
+        i = 0, // Just a helper index to assign values properly to 'colorArr'
+
         lastTime,
-        requestId, // My requested animation frame ID
         now,
-        dt; // Time delta information
+        dt, // Time delta information
+
+        // My requested animation frame ID.
+        // This variable keeps track of the current animation frame,
+        // so it can be canceled
+        requestId;
+
 
     canvas.width = 505;
     canvas.height = 606;
@@ -45,14 +61,20 @@ var Engine = (function(global) {
         now = Date.now();
         dt = (now - lastTime) / 1000.0;
 
+        /* Call our update/render functions, pass along the time delta to
+         * our update function since it may be used for smooth animation.
+         */
+
+        // If gameplay is false and player's lives is equal to 3 the Start
+        // screen is displayed
         if (gameplay === false && player.lives === 3) {
             updateStartScreen(dt);
             renderStartScreen();
         }
 
-        /* Call our update/render functions, pass along the time delta to
-         * our update function since it may be used for smooth animation.
-         */
+        // After the new game button is pressed, the gameplay variable is
+        // assigned to 'true' and the Game screen is displayed as long as
+        // the player's lives is different from zero
         if (gameplay === true && player.lives !== 0) {
             update(dt);
             render();
@@ -148,6 +170,62 @@ var Engine = (function(global) {
 
     // Update the start screen
     function updateStartScreen(dt) {
+
+        // The red component ranges from 0 to 255, then from 255 to 0
+        function changeRed() {
+            if (hue >= 255) {
+                direction = -1;
+            } else if (hue <= 0) {
+                direction = 1;
+            }
+
+            const floor = Math.floor(hue + (500*dt * direction));
+
+            // Prevent rgb color from becoming >255 or <0
+            if (floor > 255) {
+                return 255;
+            } else if (floor < 0) {
+                return 0;
+            } else {
+                return floor;
+            }
+        }
+
+        hue = changeRed();
+
+        color = `rgb(${hue},0,0)`;
+
+        // Alternate the elements of the color codes Array
+        // Permit selected button state
+        function alternateArr(item1, item2) {
+            let arr = [item1, item2];
+
+            if (i % 2 !== 0) {
+                arr.reverse();
+            }
+            return arr;
+        }
+
+        // AlternateArr function returns an array that is used
+        // to set the color of New Game button and Credits button.
+        // The array items are used by renderStartScreen function,
+        // on ctx.fillStyle properties.
+        colorArr = alternateArr(color, "#436ba8");
+
+        // If the Left or Up key is pressed, the button alternates between
+        // selected / unselected states
+        if (upKey === true || leftKey === true || downKey === true || rightKey === true) {
+            upKey = false;
+            leftKey = false;
+            downKey = false;
+            rightKey = false;
+            i++;
+            console.log(`I'm listening!!! ${colorArr[0]}`);
+            console.log(`I'm listening!!! ${colorArr[1]}`);
+        }
+
+        // If 'enter' or 'space' keys are pressed, the Start screen animation
+        // frame stops
         if (enterKey === true || spaceKey === true) {
             screenNum = 1;
             console.log(`I'm listening (updateStartScreen) ${enterKey} + ${spaceKey}
@@ -214,6 +292,8 @@ var Engine = (function(global) {
         renderEntities();
         drawScore();
 
+        // When the player's lives reaches zero, the Game Over screen is
+        // displayed
         if (player.lives === 0) {
             win.cancelAnimationFrame(requestId);
             gameOverScreen();
@@ -245,17 +325,17 @@ var Engine = (function(global) {
         ctx.fillText('Get to the RIVER', 0, 200);
 
         ctx.font = "48px Gaegu";
-        ctx.fillStyle = "#436ba8";
+        ctx.fillStyle = colorArr[0];
         ctx.textBaseline = "hanging";
         ctx.fillText('NEW GAME', 10, 300);
 
         ctx.font = "48px Gaegu";
-        ctx.fillStyle = "#436ba8";
+        ctx.fillStyle = colorArr[1];
         ctx.textBaseline = "hanging";
         ctx.fillText('CREDITS', 10, 400);
     }
 
-    //Render the credits screen
+    // Render the credits screen
     function renderCreditScreeen() {
         ctx.clearRect(0,0,canvas.width,canvas.height);
 
@@ -270,7 +350,7 @@ var Engine = (function(global) {
         ctx.fillText('Author: Nirlan Souza', 10, 300);
     }
 
-    //Render the game over screen
+    // Render the game over screen
     function renderGameOverScreen() {
         ctx.clearRect(0,0,canvas.width,canvas.height);
 
@@ -284,24 +364,6 @@ var Engine = (function(global) {
         ctx.textBaseline = "hanging";
         ctx.fillText('TRY AGAIN!', 10, 300);
     }
-
-    // Display the Start screen
-    //function startScreen() {
-        /* Get our time delta information which is required if your game
-         * requires smooth animation. Because everyone's computer processes
-         * instructions at different speeds we need a constant value that
-         * would be the same for everyone (regardless of how fast their
-         * computer is) - hurray time!
-         */
-        // now = Date.now();
-        // dt = (now - lastTime) / 1000.0;
-
-        // updateStartScreen(dt);
-        // renderStartScreen();
-
-        // lastTime = now;
-        // requestId = win.requestAnimationFrame(startScreen);
-    //}
 
     // Display the Game Over screen
     function gameOverScreen() {
