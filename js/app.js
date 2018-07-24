@@ -46,6 +46,7 @@ var Player = function() {
     this.y = 390;
     this.score = 0;
     this.lives = 3;
+    // this.speed = 100; // Player transition speed
 };
 
 // Required method for the game
@@ -116,6 +117,13 @@ Player.prototype.handleInput = function(movement) {
 
     // Controls if the Game Over screen is the current screen
     let gameOver = false;
+
+    // This variables helps trasitioning elements
+    let transition = false; // Transitioning player during gameplay
+    let transLeft = false; // Transitioning left on character selection
+    let transRight = false; // Transitioning right on character selection
+    let transX = 202; // Initial X coordinate value for character tranaitioning
+                      // on Character selection screen
 
     // This method handle the user's inputs fom the keyboard when the Game screen
     // is not running

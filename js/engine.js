@@ -34,6 +34,7 @@ var Engine = (function(global) {
         i = 0, // Helper index to assign values properly to 'colorArr'
 
         char = 0, // Helper index to select a character in an array
+        charPrev, // Previous Character index
         rowCharacters, // Hold the relative URL of character images
 
         lastTime,
@@ -76,8 +77,8 @@ var Engine = (function(global) {
 
         // If characterSelect is 'true', Character Selection screen is displayed
         if (characterSelect === true) {
-            updateChaSelScreen(dt);
-            renderChaSelScreen();
+            updateChaSelScreen();
+            renderChaSelScreen(dt);
 
             // Select player's character
             if (enterKey === true || spaceKey === true) {
@@ -302,8 +303,32 @@ var Engine = (function(global) {
     }
 
     // Update Character Selection screen
-    function updateChaSelScreen(dt) {
+    function updateChaSelScreen() {
+        // Rotate left the Character row
+        if (leftKey === true && transLeft === false
+            && transRight === false) {
+            leftKey = false;
+            transLeft = true;
 
+            charPrev = char;
+            char--;
+            if (char < 0) {
+                char = 4;
+            }
+        }
+
+        // Rotate right the Character row
+        if (rightKey === true && transLeft === false
+            && transRight === false) {
+            rightKey = false;
+            transRight = true;
+
+            charPrev = char;
+            char++;
+            if (char > 4) {
+                char = 0;
+            }
+        }
     }
 
     // Update credits screen
@@ -398,13 +423,13 @@ var Engine = (function(global) {
     }
 
     // Render the Character Selection screen
-    function renderChaSelScreen() {
+    function renderChaSelScreen(dt) {
         ctx.clearRect(0,0,canvas.width,canvas.height);
 
         ctx.font = "68px Gaegu";
         ctx.fillStyle = "#436ba8";
         ctx.textBaseline = "hanging";
-        ctx.fillText('Select your Character', 0, 200);
+        ctx.fillText('Select Character', 20, 80);
 
         ctx.fillStyle = "#85afd67d";
         ctx.fillRect(0,0,505,606);
@@ -421,27 +446,35 @@ var Engine = (function(global) {
                 'images/Selector.png',
             ];
 
-        // Rotate left the Character row
-        if (characterSelect === true && leftKey === true) {
-            leftKey = false;
-            char--;
-            if (char < 0) {
-                char = 4;
+        ctx.drawImage(Resources.get(rowCharacters[5]), 202, 250);
+
+        if (transLeft === true) {
+            ctx.drawImage(Resources.get(rowCharacters[charPrev]), transX, 250);
+
+            transX = Math.floor(transX - 500 * dt);
+
+            if (transX < -101){
+                transLeft = false;
+                transX = 202;
             }
+
         }
 
-        // Rotate right the Character row
-        if (characterSelect === true && rightKey === true) {
-            rightKey = false;
-            leftKey = false;
-            char++;
-            if (char > 4) {
-                char = 0;
+        if (transRight === true) {
+            ctx.drawImage(Resources.get(rowCharacters[charPrev]), transX, 250);
+
+            transX = Math.floor(transX + 500 * dt);
+
+            if (transX > 505){
+                transRight = false;
+                transX = 202;
             }
+
         }
 
-        ctx.drawImage(Resources.get(rowCharacters[5]), 200, 250);
-        ctx.drawImage(Resources.get(rowCharacters[char]), 200, 250);
+        if (transRight === false && transLeft === false) {
+            ctx.drawImage(Resources.get(rowCharacters[char]), 202, 250);
+        }
     }
 
     // Render the credits screen
