@@ -108,6 +108,9 @@ Player.prototype.handleInput = function(movement) {
     // Controls if the Start screen is the current screen
     let startScreen = true;
 
+    // Controls if the Player selection screen is the current screen
+    let characterSelect = false;
+
     // This variable controls if the Credits screen is the current screen
     let credits = false;
 

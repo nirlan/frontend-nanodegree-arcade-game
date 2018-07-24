@@ -31,7 +31,10 @@ var Engine = (function(global) {
         direction = 1,
         color, // Glowing red
         colorArr, // An Array with the color codes
-        i = 0, // Just a helper index to assign values properly to 'colorArr'
+        i = 0, // Helper index to assign values properly to 'colorArr'
+
+        char = 0, // Helper index to select a character in an array
+        rowCharacters, // Hold the relative URL of character images
 
         lastTime,
         now,
@@ -71,6 +74,22 @@ var Engine = (function(global) {
             renderStartScreen();
         }
 
+        // If characterSelect is 'true', Character Selection screen is displayed
+        if (characterSelect === true) {
+            updateChaSelScreen(dt);
+            renderChaSelScreen();
+
+            // Select player's character
+            if (enterKey === true || spaceKey === true) {
+                player.sprite = rowCharacters[char];
+
+                enterKey = false;
+                spaceKey = false;
+                startScreen = false;
+                gameplay = true;
+            }
+        }
+
         // After the new game button is pressed, the gameplay variable is
         // assigned to 'true' and the Game screen is displayed as long as
         // the player's lives is different from zero
@@ -102,12 +121,13 @@ var Engine = (function(global) {
             enterKey = false;
             spaceKey = false;
             startScreen = false;
-            gameplay = true;
+            characterSelect = true;
+        }
 
         // If the Credits button was glowing instead - colorArr[0] === "#436ba8 -
         // the credits variable is assigned to 'true', and hence the Credits
         // screen is displayed
-        } else if ((enterKey === true || spaceKey === true) && colorArr[0] === "#436ba8"
+        else if ((enterKey === true || spaceKey === true) && colorArr[0] === "#436ba8"
                    && credits === false) {
             enterKey = false;
             spaceKey = false;
@@ -281,6 +301,11 @@ var Engine = (function(global) {
         }
     }
 
+    // Update Character Selection screen
+    function updateChaSelScreen(dt) {
+
+    }
+
     // Update credits screen
     function updateCreditScreen(dt) {
 
@@ -372,6 +397,53 @@ var Engine = (function(global) {
         ctx.fillText('CREDITS', 10, 400);
     }
 
+    // Render the Character Selection screen
+    function renderChaSelScreen() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+
+        ctx.font = "68px Gaegu";
+        ctx.fillStyle = "#436ba8";
+        ctx.textBaseline = "hanging";
+        ctx.fillText('Select your Character', 0, 200);
+
+        ctx.fillStyle = "#85afd67d";
+        ctx.fillRect(0,0,505,606);
+
+        /* This array holds the relative URL to the image used
+         * for that particular character.
+         */
+        rowCharacters = [
+                'images/char-boy.png',
+                'images/char-cat-girl.png',
+                'images/char-horn-girl.png',
+                'images/char-pink-girl.png',
+                'images/char-princess-girl.png',
+                'images/Selector.png',
+            ];
+
+        // Rotate left the Character row
+        if (characterSelect === true && leftKey === true) {
+            leftKey = false;
+            char--;
+            if (char < 0) {
+                char = 4;
+            }
+        }
+
+        // Rotate right the Character row
+        if (characterSelect === true && rightKey === true) {
+            rightKey = false;
+            leftKey = false;
+            char++;
+            if (char > 4) {
+                char = 0;
+            }
+        }
+
+        ctx.drawImage(Resources.get(rowCharacters[5]), 200, 250);
+        ctx.drawImage(Resources.get(rowCharacters[char]), 200, 250);
+    }
+
     // Render the credits screen
     function renderCreditScreen() {
         ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -420,8 +492,13 @@ var Engine = (function(global) {
         'images/water-block.png',
         'images/grass-block.png',
         'images/enemy-bug.png',
+        'images/heart-small.png',
         'images/char-boy.png',
-        'images/heart-small.png'
+        'images/char-cat-girl.png',
+        'images/char-horn-girl.png',
+        'images/char-pink-girl.png',
+        'images/char-princess-girl.png',
+        'images/Selector.png'
     ]);
     Resources.onReady(init);
 
