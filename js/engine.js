@@ -34,8 +34,11 @@ var Engine = (function(global) {
         i = 0, // Helper index to assign values properly to 'colorArr'
 
         char = 0, // Helper index to select a character in an array
-        charPrev, // Previous Character index
         rowCharacters, // Hold the relative URL of character images
+
+        // An array that contains the current, the next,
+        // and the previous selected Character index.
+        arrChar,
 
         lastTime,
         now,
@@ -87,6 +90,7 @@ var Engine = (function(global) {
                 enterKey = false;
                 spaceKey = false;
                 startScreen = false;
+                characterSelect = false;
                 gameplay = true;
             }
         }
@@ -147,15 +151,12 @@ var Engine = (function(global) {
         if (gameOver === true) {
             updateGameOverScreen(dt);
             renderGameOverScreen();
-
-            console.log(`I'm listening! (gameOverScreen) ${gameOver}`);
         }
 
         if ((enterKey === true || spaceKey === true) && gameOver === true) {
                 enterKey = false;
                 spaceKey = false;
                 gameOver = false;
-                console.log(`I'm listening! (gameOverScreen) ${gameOver}`);
                 startScreen = true;
         }
 
@@ -179,28 +180,6 @@ var Engine = (function(global) {
         reset();
         lastTime = Date.now();
         main();
-    }
-
-    // This function implements collision detection on entities,
-    // if the player collides, the lives are updated and it returns to
-    // the initial position
-    function checkCollisions() {
-        allEnemies.forEach(function(enemy) {
-            const enemySquare = {x: Math.floor(enemy.x), y: enemy.y + 75, width: 100, height: 75};
-            const playerSquare = {x: player.x + 35, y: player.y + 75, width: 49, height: 67};
-
-            // Thanks to MDN! - 2D collision detection algorithm
-            // https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
-            if (enemySquare.x < playerSquare.x + playerSquare.width &&
-                enemySquare.x + enemySquare.width > playerSquare.x &&
-                enemySquare.y < playerSquare.y + playerSquare.height &&
-                enemySquare.height + enemySquare.y > playerSquare.y) {
-
-                player.x = 202;
-                player.y = 390;
-                player.lives--;
-            }
-        });
     }
 
     // Create the score and lives display
@@ -245,6 +224,28 @@ var Engine = (function(global) {
             enemy.update(dt);
         });
         player.update();
+    }
+
+    // This function implements collision detection on entities,
+    // if the player collides, the lives are updated and it returns to
+    // the initial position
+    function checkCollisions() {
+        allEnemies.forEach(function(enemy) {
+            const enemySquare = {x: Math.floor(enemy.x), y: enemy.y + 75, width: 100, height: 75};
+            const playerSquare = {x: player.x + 35, y: player.y + 75, width: 49, height: 67};
+
+            // Thanks to MDN! - 2D collision detection algorithm
+            // https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
+            if (enemySquare.x < playerSquare.x + playerSquare.width &&
+                enemySquare.x + enemySquare.width > playerSquare.x &&
+                enemySquare.y < playerSquare.y + playerSquare.height &&
+                enemySquare.height + enemySquare.y > playerSquare.y) {
+
+                player.x = 202;
+                player.y = 390;
+                player.lives--;
+            }
+        });
     }
 
     // Update the start screen
@@ -304,17 +305,15 @@ var Engine = (function(global) {
 
     // Update Character Selection screen
     function updateChaSelScreen() {
+        // An array that contains the current, the next,
+        // and the previous selected Character index.
+        arrChar = charPrevCharNext(char);
+
         // Rotate left the Character row
         if (leftKey === true && transLeft === false
             && transRight === false) {
             leftKey = false;
             transLeft = true;
-
-            charPrev = char;
-            char--;
-            if (char < 0) {
-                char = 4;
-            }
         }
 
         // Rotate right the Character row
@@ -322,12 +321,44 @@ var Engine = (function(global) {
             && transRight === false) {
             rightKey = false;
             transRight = true;
+        }
+    }
 
-            charPrev = char;
-            char++;
-            if (char > 4) {
-                char = 0;
+    // Creates an array that contains the current, the next,
+    // and the previous selected Character index.
+    function charPrevCharNext(char) {
+        let charPrev = char-1;
+        let charNext = char+1;
+
+        if (char === 0) {
+            charPrev = 4;
+        }
+        if (char === 4) {
+            charNext = 0;
+        }
+        return [charPrev, char, charNext];
+    }
+
+    // Return the index of the character that
+    // enters the screeen when the carousel turns
+    function newCharNext(char) {
+        if (transLeft === true) {
+            if (char === 3){
+                return 0;
             }
+            if (char === 4) {
+                return 1;
+            }
+            return char+2;
+        }
+        if (transRight === true) {
+            if (char === 0) {
+                return 3;
+            }
+            if (char === 1) {
+                return 4;
+            }
+            return char-2;
         }
     }
 
@@ -443,37 +474,56 @@ var Engine = (function(global) {
                 'images/char-horn-girl.png',
                 'images/char-pink-girl.png',
                 'images/char-princess-girl.png',
-                'images/Selector.png',
+                'images/Selector.png'
             ];
 
         ctx.drawImage(Resources.get(rowCharacters[5]), 202, 250);
 
         if (transLeft === true) {
-            ctx.drawImage(Resources.get(rowCharacters[charPrev]), transX, 250);
+            ctx.drawImage(Resources.get(rowCharacters[arrChar[0]]), transX-150, 250);
+            ctx.drawImage(Resources.get(rowCharacters[arrChar[1]]), transX, 250);
+            ctx.drawImage(Resources.get(rowCharacters[arrChar[2]]), transX+150, 250);
+            ctx.drawImage(Resources.get(rowCharacters[newCharNext(char)]), transX+300, 250);
 
             transX = Math.floor(transX - 500 * dt);
 
-            if (transX < -101){
+            if (transX <= 52){
                 transLeft = false;
                 transX = 202;
-            }
 
+                char++; // Update current Character index
+                if (char === 5) {
+                    char = 0;
+                }
+                arrChar = charPrevCharNext(char); // Update array with new char index values
+            }
         }
 
         if (transRight === true) {
-            ctx.drawImage(Resources.get(rowCharacters[charPrev]), transX, 250);
+            ctx.drawImage(Resources.get(rowCharacters[newCharNext(char)]), transX-300, 250);
+            ctx.drawImage(Resources.get(rowCharacters[arrChar[0]]), transX-150, 250);
+            ctx.drawImage(Resources.get(rowCharacters[arrChar[1]]), transX, 250);
+            ctx.drawImage(Resources.get(rowCharacters[arrChar[2]]), transX+150, 250);
 
             transX = Math.floor(transX + 500 * dt);
 
-            if (transX > 505){
+            if (transX >= 352){
                 transRight = false;
                 transX = 202;
+
+                char--; // Update current Character index
+                if (char === -1) {
+                    char = 4;
+                }
+                arrChar = charPrevCharNext(char); // Update array with new char index values
             }
 
         }
 
         if (transRight === false && transLeft === false) {
-            ctx.drawImage(Resources.get(rowCharacters[char]), 202, 250);
+            ctx.drawImage(Resources.get(rowCharacters[arrChar[0]]), 52, 250);
+            ctx.drawImage(Resources.get(rowCharacters[arrChar[1]]), 202, 250);
+            ctx.drawImage(Resources.get(rowCharacters[arrChar[2]]), 352, 250);
         }
     }
 

@@ -23,7 +23,7 @@ Enemy.prototype.update = function(dt) {
 
     // All the enemies have a constant "y" coordinate
     // so it updates just the "x" coordinate
-    this.x += this.speed * dt;
+    this.x += Math.floor(this.speed * dt);
 
     // New enemy shows up when an enemy goes out of screen
     if (this.x >= 505) {
