@@ -40,6 +40,12 @@ var Engine = (function(global) {
         // and the previous selected Character index.
         arrChar,
 
+        //Time counter variables
+        count = 0,
+        seconds = 0,
+        minutes = 0,
+        timeString = '', // Time string with two digits format (MM:SS)
+
         lastTime,
         now,
         dt, // Time delta information
@@ -172,6 +178,36 @@ var Engine = (function(global) {
         requestId = win.requestAnimationFrame(main);
     }
 
+    // A counter for the game
+    function counter() {
+        const t0 = Math.floor(lastTime/1000);
+        const t1 = Math.floor(now/1000);
+
+        if (t0 !== t1) {
+            count++;
+            seconds++;
+            console.log(count);
+        }
+        if (seconds === 60) {
+            minutes++;
+            seconds = 0;
+        }
+
+        let twoDigMinutes = function() {
+            return (minutes === 0) ? '00'
+                : (minutes < 10) ? `0${minutes}`
+                :                  `${minutes}`;
+        };
+
+        let twoDigSeconds = function() {
+            return (seconds === 0) ? '00'
+                : (seconds < 10) ? `0${seconds}`
+                :                  `${seconds}`;
+        };
+
+        timeString = `${twoDigMinutes()}:${twoDigSeconds()}`;
+    }
+
     /* This function does some initial setup that should only occur once,
      * particularly setting the lastTime variable that is required for the
      * game loop.
@@ -180,22 +216,6 @@ var Engine = (function(global) {
         reset();
         lastTime = Date.now();
         main();
-    }
-
-    // Create the score and lives display
-    function drawScore() {
-        ctx.font = "48px Gaegu";
-        ctx.fillStyle = "#3f87a6";
-        ctx.textBaseline = "hanging";
-        ctx.fillText(`SCORE: ${player.score}`, 2, 15);
-        ctx.fillText('LIVES:', 240, 15);
-
-        // Each player's life draws a heart on the display
-        let n = 390;
-        for (let i = player.lives; i > 0; i--) {
-           ctx.drawImage(Resources.get('images/heart-small.png'), n, 15);
-           n += 40;
-        }
     }
 
     /* This function is called by main (our game loop) and itself calls all
@@ -210,6 +230,7 @@ var Engine = (function(global) {
     function update(dt) {
         updateEntities(dt);
         checkCollisions();
+        counter();
     }
 
     /* This is called by the update function and loops through all of the
@@ -223,7 +244,12 @@ var Engine = (function(global) {
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
+
         player.update();
+
+        allCollectibles.forEach(function(collectible) {
+            collectible.update(dt);
+        });
     }
 
     // This function implements collision detection on entities,
@@ -431,6 +457,34 @@ var Engine = (function(global) {
         });
 
         player.render();
+
+        allCollectibles.forEach(function(collectible) {
+            collectible.render();
+        });
+    }
+
+    // Create the score and lives display
+    function drawScore() {
+        ctx.font = "48px Gaegu";
+        ctx.fillStyle = "#3f87a6";
+        ctx.textBaseline = "hanging";
+        ctx.fillText(`SCORE:`, 2, 15);
+        ctx.fillText('LIVES:', 250, 15);
+
+        ctx.fillStyle = "#ff0095";
+        ctx.fillText(`${player.score}`, 150, 15);
+
+        // Each player's life draws a heart on the display
+        let n = 390;
+        for (let i = player.lives; i > 0; i--) {
+           ctx.drawImage(Resources.get('images/heart-small.png'), n, 15);
+           n += 40;
+        }
+
+        // Counter
+        ctx.font = "38px Gaegu";
+        ctx.fillStyle = "#fffd93";
+        ctx.fillText(`TIME: ${timeString}`, 8, 550);
     }
 
     // Render the start screen
@@ -444,12 +498,9 @@ var Engine = (function(global) {
 
         ctx.font = "48px Gaegu";
         ctx.fillStyle = colorArr[0];
-        ctx.textBaseline = "hanging";
         ctx.fillText('NEW GAME', 10, 300);
 
-        ctx.font = "48px Gaegu";
         ctx.fillStyle = colorArr[1];
-        ctx.textBaseline = "hanging";
         ctx.fillText('CREDITS', 10, 400);
     }
 
@@ -457,13 +508,13 @@ var Engine = (function(global) {
     function renderChaSelScreen(dt) {
         ctx.clearRect(0,0,canvas.width,canvas.height);
 
+        ctx.fillStyle = "#ffffffd9";
+        ctx.fillRect(0,0,505,606);
+
         ctx.font = "68px Gaegu";
         ctx.fillStyle = "#436ba8";
         ctx.textBaseline = "hanging";
         ctx.fillText('Select Character', 20, 80);
-
-        ctx.fillStyle = "#85afd67d";
-        ctx.fillRect(0,0,505,606);
 
         /* This array holds the relative URL to the image used
          * for that particular character.
@@ -537,8 +588,6 @@ var Engine = (function(global) {
         ctx.fillText('CREDITS', 10, 200);
 
         ctx.font = "48px Gaegu";
-        ctx.fillStyle = "#436ba8";
-        ctx.textBaseline = "hanging";
         ctx.fillText('Author: Nirlan Souza', 10, 300);
 
     }
@@ -553,8 +602,6 @@ var Engine = (function(global) {
         ctx.fillText('GAME OVER', 10, 200);
 
         ctx.font = "48px Gaegu";
-        ctx.fillStyle = "#436ba8";
-        ctx.textBaseline = "hanging";
         ctx.fillText('TRY AGAIN!', 10, 300);
     }
 
@@ -581,6 +628,12 @@ var Engine = (function(global) {
         'images/char-horn-girl.png',
         'images/char-pink-girl.png',
         'images/char-princess-girl.png',
+        'images/Gem Blue.png',
+        'images/Gem Green.png',
+        'images/Gem Orange.png',
+        'images/Heart.png',
+        'images/Key.png',
+        'images/Rock.png',
         'images/Selector.png'
     ]);
     Resources.onReady(init);

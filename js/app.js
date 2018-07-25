@@ -1,5 +1,5 @@
 // Enemies our player must avoid
-var Enemy = function(x, y, speed) {
+let Enemy = function(x, y, speed) {
     // Variables applied to each of our instances go here,
     // we've provided one for you to get started
 
@@ -39,7 +39,7 @@ Enemy.prototype.render = function() {
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
-var Player = function() {
+let Player = function() {
     this.sprite = 'images/char-boy.png';
 
     this.x = 202;
@@ -75,7 +75,7 @@ Player.prototype.handleInput = function(movement) {
             // The player gets to the river, it returns to the initial position
             // and the score is updated
             } else {
-                this.score++;
+                this.score+=10;
                 this.x = 202;
                 this.y = 390;
             }
@@ -90,87 +90,190 @@ Player.prototype.handleInput = function(movement) {
     }
 };
 
-    // Handle player's inputs from the keyboard regarding the screen:
-    // these variables controls if any of these keys were pressed,
-    // and hence they permit option selection on the start screen,
-    // pause, mute, and restart the game
-    let enterKey = false; // Enter key pressed (true) / not pressed (false)
-    let spaceKey = false; // Space key pressed (true) / not pressed (false)
-    let leftKey = false; // Left key pressed (true) / not pressed (false)
-    let upKey = false; // Up key pressed (true) / not pressed (false)
-    let rightKey = false; // Right key pressed (true) / not pressed (false)
-    let downKey = false; // Down key pressed (true) / not pressed (false)
+// Collectible items on screen
+// Create collectibles items class
+let Collectibles = function(x, y){
+    this.x = x;
+    this.y = y;
+    this.count = 10;
+};
 
-    // Gameplay variable controls if the game is running.
-    // The value of this boolean variable is assigned to 'true' when the 'space'
-    // or the 'enter' key is pressed on the Start screen.
-    let gameplay = false;
+// Update displayed items on screen
+Collectibles.prototype.update = function(dt) {
 
-    // Controls if the Start screen is the current screen
-    let startScreen = true;
+};
 
-    // Controls if the Player selection screen is the current screen
-    let characterSelect = false;
+// Draw the items
+Collectibles.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
 
-    // This variable controls if the Credits screen is the current screen
-    let credits = false;
+// OrangeGem subclass of Collectibles class
+let OrangeGem = function(x, y) {
+    Collectibles.call(this, x, y);
 
-    // Controls if the Game Over screen is the current screen
-    let gameOver = false;
+    this.sprite = 'images/Gem Orange.png';
+    this.score = 20;
+    this.frequency = 50;
+};
 
-    // This variables helps trasitioning elements
-    let transition = false; // Transitioning player during gameplay
-    let transLeft = false; // Transitioning left on character selection
-    let transRight = false; // Transitioning right on character selection
-    let transX = 202; // Initial X coordinate value for character tranaitioning
-                      // on Character selection screen
+OrangeGem.prototype = Object.create(Collectibles.prototype);
+OrangeGem.prototype.constructor = OrangeGem;
 
-    // This method handle the user's inputs fom the keyboard when the Game screen
-    // is not running
-    function handleInput(input) {
-        switch (input) {
+// GreenGem subclass of Collectibles class
+let GreenGem = function(x, y) {
+    Collectibles.call(this, x, y);
 
-            case 'enter':
-                enterKey = true;
-                break;
+    this.sprite = 'images/Gem Green.png';
+    this.score = 40;
+    this.frequency = 100;
+};
 
-            case 'space':
-                spaceKey = true;
-                break;
+GreenGem.prototype = Object.create(Collectibles.prototype);
+GreenGem.prototype.constructor = GreenGem;
 
-            case 'left':
-                leftKey = true;
-                break;
+// BlueGem subclass of Collectibles class
+let BlueGem = function(x, y) {
+    Collectibles.call(this, x, y);
 
-            case 'up':
-                upKey = true;
-                break;
+    this.sprite = 'images/Gem Blue.png';
+    this.score = 80;
+    this.frequency = 250;
+};
 
-            case 'right':
-                rightKey = true;
-                break;
+BlueGem.prototype = Object.create(Collectibles.prototype);
+BlueGem.prototype.constructor = BlueGem;
 
-            case 'down':
-                downKey = true;
-        }
+// GoldenKey subclass of Collectibles class
+let GoldenKey = function(x, y) {
+    Collectibles.call(this, x, y);
+
+    this.sprite = 'images/Key.png';
+    this.score = 200;
+    this.frequency = 500;
+};
+
+GoldenKey.prototype = Object.create(Collectibles.prototype);
+GoldenKey.prototype.constructor = GoldenKey;
+
+// Heart subclass of Collectibles class
+let Heart = function(x, y) {
+    Collectibles.call(this, x, y);
+
+    this.sprite = 'images/Heart.png';
+    this.life = 1;
+    this.frequency = 500;
+};
+
+Heart.prototype = Object.create(Collectibles.prototype);
+Heart.prototype.constructor = Heart;
+
+// Rocks that blocks the way of the player
+let Rock = function(x, y) {
+    this.sprite = 'images/Rock.png';
+    this.x = x;
+    this.y = y;
+};
+
+// Update displayed items on screen
+Rock.prototype.update = function() {
+
+};
+
+// Draw the items
+Rock.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+
+// Handle player's inputs from the keyboard regarding the screen:
+// these variables controls if any of these keys were pressed,
+// and hence they permit option selection on the start screen,
+// pause, mute, and restart the game
+let enterKey = false; // Enter key pressed (true) / not pressed (false)
+let spaceKey = false; // Space key pressed (true) / not pressed (false)
+let leftKey = false; // Left key pressed (true) / not pressed (false)
+let upKey = false; // Up key pressed (true) / not pressed (false)
+let rightKey = false; // Right key pressed (true) / not pressed (false)
+let downKey = false; // Down key pressed (true) / not pressed (false)
+
+// Gameplay variable controls if the game is running.
+// The value of this boolean variable is assigned to 'true' when the 'space'
+// or the 'enter' key is pressed on the Start screen.
+let gameplay = false;
+
+// Controls if the Start screen is the current screen
+let startScreen = true;
+
+// Controls if the Player selection screen is the current screen
+let characterSelect = false;
+
+// This variable controls if the Credits screen is the current screen
+let credits = false;
+
+// Controls if the Game Over screen is the current screen
+let gameOver = false;
+
+// This variables helps trasitioning elements
+let transition = false; // Transitioning player during gameplay
+let transLeft = false; // Transitioning left on character selection
+let transRight = false; // Transitioning right on character selection
+let transX = 202; // Initial X coordinate value for character tranaitioning
+                  // on Character selection screen
+
+// This method handle the user's inputs fom the keyboard when the Game screen
+// is not running
+function handleInput(input) {
+    switch (input) {
+
+        case 'enter':
+            enterKey = true;
+            break;
+
+        case 'space':
+            spaceKey = true;
+            break;
+
+        case 'left':
+            leftKey = true;
+            break;
+
+        case 'up':
+            upKey = true;
+            break;
+
+        case 'right':
+            rightKey = true;
+            break;
+
+        case 'down':
+            downKey = true;
     }
+}
 
-// Now instantiate your objects.
-// Place all enemy objects in an array called allEnemies
-// Place the player object in a variable called player
 
 // Enemy random speed generator
 let speedGen = () => 80 + Math.random()*200;
 
-// Instantiating all enemy objects
+// Place all enemy objects in an array called allEnemies
 let allEnemies = [];
 
+// Instantiating all enemy objects
 allEnemies.push(new Enemy(-101, 63, speedGen()));
 allEnemies.push(new Enemy(-101, 146, speedGen()));
 allEnemies.push(new Enemy(-101, 229, speedGen()));
 
-// Instantiating the player object
+// Place the player object in a variable called player
+// Instantiate the player object
 let player = new Player();
+
+// Place all collectibles objects in an array called allCollectibles
+let allCollectibles = [];
+
+// Place all rocksobjects in an array called allRocks
+let allRocks = [];
+
+// Instatiate the rocks
+let rock = new Rock();
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
