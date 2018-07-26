@@ -250,31 +250,6 @@ function handleInput(input) {
     }
 }
 
-
-// Enemy random speed generator
-let speedGen = () => 80 + Math.random()*200;
-
-// Place all enemy objects in an array called allEnemies
-let allEnemies = [];
-
-// Instantiating all enemy objects
-allEnemies.push(new Enemy(-101, 63, speedGen()));
-allEnemies.push(new Enemy(-101, 146, speedGen()));
-allEnemies.push(new Enemy(-101, 229, speedGen()));
-
-// Place the player object in a variable called player
-// Instantiate the player object
-let player = new Player();
-
-// Place all collectibles objects in an array called allCollectibles
-let allCollectibles = [];
-
-// Place all rocksobjects in an array called allRocks
-let allRocks = [];
-
-// Instatiate the rocks
-let rock = new Rock();
-
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
 document.addEventListener('keyup', function(e) {
@@ -299,3 +274,77 @@ document.addEventListener('keyup', function(e) {
         handleInput(allowedKeys[e.keyCode]);
     }
 });
+
+// Random integer generator
+// Adapted from:
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+let getRandomInt = (max) => Math.floor(Math.random()*Math.floor(max));
+
+// Randomized 'x' coordinate display
+let randomX = function() {
+    let num = getRandomInt(5),
+        numPrev = num;
+    return (num === 0) ? 0
+         : (num === 1) ? 101
+         : (num === 2) ? 201
+         : (num === 3) ? 301
+         :               401;
+};
+
+// Randomized 'y' coordinate display
+let randomY = function() {
+    let num = getRandomInt(3),
+        numPrev = num;
+    return (num === 0) ? 53
+         : (num === 1) ? 136
+         :               219;
+};
+
+// Check if two random elements are in the same tile
+let checkSameTile = function(arr) {
+    let setX = new Set();
+
+    let bool = function() {
+            arr.forEach(function(element) {
+                setX.add(element.x);
+            });
+            return (setX.size !== arr.length) ? true
+                : false;
+    };
+
+    // If there are 2 elements in the same tile
+    // delete this element and populate the array
+    // if a new element and recheck
+    while (bool()) {
+        arr.pop();
+        arr.push(new Rock(randomX(), randomY()));
+    }
+};
+
+// Enemy random speed generator
+let speedGen = () => 80 + Math.random()*200;
+
+// Place all enemy objects in an array called allEnemies
+let allEnemies = [];
+
+// Instantiating all enemy objects
+allEnemies.push(new Enemy(-101, 63, speedGen()));
+allEnemies.push(new Enemy(-101, 146, speedGen()));
+allEnemies.push(new Enemy(-101, 229, speedGen()));
+
+// Place the player object in a variable called player
+// Instantiate the player object
+let player = new Player();
+
+// Place all collectibles objects in an array called allCollectibles
+let allCollectibles = [];
+
+// Place all rocksobjects in an array called allRocks
+let allRocks = [];
+
+// Instatiate the rocks
+allRocks.push(new Rock(randomX(), randomY()));
+allRocks.push(new Rock(randomX(), randomY()));
+allRocks.push(new Rock(randomX(), randomY()));
+
+checkSameTile(allRocks);

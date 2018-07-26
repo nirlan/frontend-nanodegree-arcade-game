@@ -178,36 +178,6 @@ var Engine = (function(global) {
         requestId = win.requestAnimationFrame(main);
     }
 
-    // A counter for the game
-    function counter() {
-        const t0 = Math.floor(lastTime/1000);
-        const t1 = Math.floor(now/1000);
-
-        if (t0 !== t1) {
-            count++;
-            seconds++;
-            console.log(count);
-        }
-        if (seconds === 60) {
-            minutes++;
-            seconds = 0;
-        }
-
-        let twoDigMinutes = function() {
-            return (minutes === 0) ? '00'
-                : (minutes < 10) ? `0${minutes}`
-                :                  `${minutes}`;
-        };
-
-        let twoDigSeconds = function() {
-            return (seconds === 0) ? '00'
-                : (seconds < 10) ? `0${seconds}`
-                :                  `${seconds}`;
-        };
-
-        timeString = `${twoDigMinutes()}:${twoDigSeconds()}`;
-    }
-
     /* This function does some initial setup that should only occur once,
      * particularly setting the lastTime variable that is required for the
      * game loop.
@@ -272,6 +242,36 @@ var Engine = (function(global) {
                 player.lives--;
             }
         });
+    }
+
+    // A counter for the game
+    function counter() {
+        const t0 = Math.floor(lastTime/1000);
+        const t1 = Math.floor(now/1000);
+
+        if (t0 !== t1) {
+            count++;
+            seconds++;
+        }
+
+        if (seconds === 60) {
+            minutes++;
+            seconds = 0;
+        }
+
+        let twoDigMinutes = function() {
+            return (minutes === 0) ? '00'
+                : (minutes < 10) ? `0${minutes}`
+                :                  `${minutes}`;
+        };
+
+        let twoDigSeconds = function() {
+            return (seconds === 0) ? '00'
+                : (seconds < 10) ? `0${seconds}`
+                :                  `${seconds}`;
+        };
+
+        timeString = `${twoDigMinutes()}:${twoDigSeconds()}`;
     }
 
     // Update the start screen
@@ -452,15 +452,20 @@ var Engine = (function(global) {
         /* Loop through all of the objects within the allEnemies array and call
          * the render function you have defined.
          */
+
+        allCollectibles.forEach(function(collectible) {
+            collectible.render();
+        });
+
+        allRocks.forEach(function(rock) {
+            rock.render();
+        });
+
         allEnemies.forEach(function(enemy) {
             enemy.render();
         });
 
         player.render();
-
-        allCollectibles.forEach(function(collectible) {
-            collectible.render();
-        });
     }
 
     // Create the score and lives display
