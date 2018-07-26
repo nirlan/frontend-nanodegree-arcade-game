@@ -300,26 +300,19 @@ let randomY = function() {
          :               219;
 };
 
-// Check if two random elements are in the same tile
-let checkSameTile = function(arr) {
+// Get a set of random 'x' coordinates
+// Place the in a set to prevent repeated values
+// This set will be used to create the Rock and Collectibles objects
+// The 'num' parameter represents the number differents objects
+// that will be created
+let getX = function(num) {
     let setX = new Set();
 
-    let bool = function() {
-            arr.forEach(function(element) {
-                setX.add(element.x);
-            });
-            return (setX.size !== arr.length) ? true
-                : false;
-    };
-
-    // If there are 2 elements in the same tile
-    // delete this element and populate the array
-    // if a new element and recheck
-    while (bool()) {
-        arr.pop();
-        arr.push(new Rock(randomX(), randomY()));
+    while (setX.size < num) {
+        setX.add(randomX());
     }
-};
+    return setX;
+}
 
 // Enemy random speed generator
 let speedGen = () => 80 + Math.random()*200;
@@ -343,8 +336,8 @@ let allCollectibles = [];
 let allRocks = [];
 
 // Instatiate the rocks
-allRocks.push(new Rock(randomX(), randomY()));
-allRocks.push(new Rock(randomX(), randomY()));
-allRocks.push(new Rock(randomX(), randomY()));
-
-checkSameTile(allRocks);
+let numRocks = 3;
+let randomXset = getX(numRocks); // Get random, not repeated, 'x' coordinates
+for (let x of randomXset) {
+    allRocks.push(new Rock(x, randomY()));
+}
