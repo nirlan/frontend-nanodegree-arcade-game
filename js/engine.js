@@ -226,9 +226,10 @@ var Engine = (function(global) {
     // if the player collides, the lives are updated and it returns to
     // the initial position
     function checkCollisions() {
+        const playerSquare = {x: player.x + 35, y: player.y + 75, width: 49, height: 67};
+
         allEnemies.forEach(function(enemy) {
             const enemySquare = {x: Math.floor(enemy.x), y: enemy.y + 75, width: 100, height: 75};
-            const playerSquare = {x: player.x + 35, y: player.y + 75, width: 49, height: 67};
 
             // Thanks to MDN! - 2D collision detection algorithm
             // https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
@@ -242,6 +243,55 @@ var Engine = (function(global) {
                 player.lives--;
             }
         });
+    }
+
+
+    // Check if is there is an item or an rock in the tile, if so
+    // this function returns true, else, false.
+    // This function is called in player.handleInput() method
+    // to prevent the player of moving over the rocks,
+    // and to check is there is a collectible in the tile,
+    // so the player can collect it.
+    // It takes an array of entities and the movement of the player as parameter.
+    function someEntityInTile(arr, movement) {
+
+        // Check if there is an entity in the tile that the player wants to move in
+        let playerSquare;
+        switch (movement) {
+            case 'left':
+                playerSquare = {x: this.x - 101, y: this.y, width: 49, height: 67};
+                checkSquare();
+                return false;
+                break;
+            case 'up':
+                playerSquare = {x: this.x, y: this.y - 83, width: 49, height: 67};
+                checkSquare();
+                return false;
+                break;
+            case 'right':
+                playerSquare = {x: this.x + 101, y: this.y, width: 49, height: 67};
+                checkSquare();
+                return false;
+                break;
+            case 'down':
+                playerSquare = {x: this.x, y: this.y + 83, width: 49, height: 67};
+                checkSquare();
+                return false;
+        }
+
+        function checkSquare() {
+            arr.forEach(function(ent) {
+                const entSquare = {x: ent.x, y: ent.y, width: 49, height: 67};
+
+                if (entSquare.x < playerSquare.x + playerSquare.width &&
+                    entSquare.x + entSquare.width > playerSquare.x &&
+                    entSquare.y < playerSquare.y + playerSquare.height &&
+                    entSquare.height + entSquare.y > playerSquare.y) {
+
+                   return true;
+                }
+            });
+        }
     }
 
     // A counter for the game

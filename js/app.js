@@ -90,6 +90,56 @@ Player.prototype.handleInput = function(movement) {
     }
 };
 
+// Get the player inputs and calculate the square that the player wants to move in
+// This functions returns an object that represents that square
+// The object returnes is used by checkSquare() function
+Player.prototype.playerNextSquare = function(movement) {
+    let playerNextSquare;
+
+    switch (movement) {
+        case 'left':
+            playerNextSquare = {x: this.x - 66, y: this.y + 75, width: 49, height: 67};
+            break;
+        case 'up':
+            playerNextSquare = {x: this.x + 35, y: this.y - 8, width: 49, height: 67};
+            break;
+        case 'right':
+            playerNextSquare = {x: this.x + 136, y: this.y + 75, width: 49, height: 67};
+            break;
+        case 'down':
+            playerNextSquare = {x: this.x + 35, y: this.y + 158, width: 49, height: 67};
+    }
+
+    return playerNextSquare;
+}
+
+// Check if is there is an item or an rock in the tile, if so
+// this function assigns 'true' to 'entityInTile' variable.
+// This function is called in player.handleInput() method
+// to prevent the player of moving over the rocks,
+// and to check is there is a collectible in the tile,
+// so the player can collect it.
+// It takes two parameters:
+// The 'playerNextSquare' object that is returned by the player.playerNextSquare
+// method, and an array of entities.
+function checkSquare(playerNextSquare, arr) {
+    let playerSquare = playerNextSquare;
+
+    // Check if there is an entity in the tile that the player wants to move in
+    // by using 2D - collision detection algorithm
+    arr.forEach(function(ent) {
+        const entSquare = {x: ent.x, y: ent.y + 75, width: 100, height: 75};
+
+        if (entSquare.x < playerSquare.x + playerSquare.width &&
+            entSquare.x + entSquare.width > playerSquare.x &&
+            entSquare.y < playerSquare.y + playerSquare.height &&
+            entSquare.height + entSquare.y > playerSquare.y) {
+
+           entityInTile = true;
+        }
+    });
+}
+
 // Collectible items on screen
 // Create collectibles items class
 let Collectibles = function(x, y){
@@ -220,6 +270,10 @@ let transRight = false; // Transitioning right on character selection
 let transX = 202; // Initial X coordinate value for character tranaitioning
                   // on Character selection screen
 
+// This variable holds the value returned by player.someEntityInTile() method
+let entityInTile = false;
+
+
 // This method handle the user's inputs fom the keyboard when the Game screen
 // is not running
 function handleInput(input) {
@@ -250,31 +304,6 @@ function handleInput(input) {
     }
 }
 
-// This listens for key presses and sends the keys to your
-// Player.handleInput() method. You don't need to modify this.
-document.addEventListener('keyup', function(e) {
-    var allowedKeys = {
-        13: 'enter',
-        32: 'space',
-        37: 'left',
-        38: 'up',
-        39: 'right',
-        40: 'down',
-        80: 'pause'
-    };
-
-    // If gameplay variable is 'true', it means the game is
-    // on the Game screen and the keys pressed are sent
-    // to Player.handleInput() method, in order to move the player
-    // accordingly. Else, the game is not on the Game screen, and
-    // the keys are sent to handleInput() method
-    if (gameplay === true) {
-        player.handleInput(allowedKeys[e.keyCode]);
-    } else {
-        handleInput(allowedKeys[e.keyCode]);
-    }
-});
-
 // Random integer generator
 // Adapted from:
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
@@ -301,9 +330,9 @@ let randomY = function() {
 };
 
 // Get a set of random 'x' coordinates
-// Place the in a set to prevent repeated values
+// Place the values in a set to prevent repeated values
 // This set will be used to create the Rock and Collectibles objects
-// The 'num' parameter represents the number differents objects
+// The 'num' parameter represents the number of differents objects
 // that will be created
 let getX = function(num) {
     let setX = new Set();
@@ -341,3 +370,46 @@ let randomXset = getX(numRocks); // Get random, not repeated, 'x' coordinates
 for (let x of randomXset) {
     allRocks.push(new Rock(x, randomY()));
 }
+
+// This listens for key presses and sends the keys to your
+// Player.handleInput() method. You don't need to modify this.
+document.addEventListener('keyup', function(e) {
+    var allowedKeys = {
+        13: 'enter',
+        32: 'space',
+        37: 'left',
+        38: 'up',
+        39: 'right',
+        40: 'down',
+        80: 'pause'
+    };
+
+    // If gameplay variable is 'true', it means the game is
+    // on the Game screen and the keys pressed are sent
+    // to Player.handleInput() method, in order to move the player
+    // accordingly. Else, the game is not on the Game screen, and
+    // the keys are sent to handleInput() method
+    if (gameplay === true) {
+
+        if (allowedKeys[e.keyCode] === 'left'
+            || allowedKeys[e.keyCode] === 'up'
+            || allowedKeys[e.keyCode] === 'right'
+            || allowedKeys[e.keyCode] === 'down') {
+
+            // Check if there is a rock in the tile that the player wants to move in
+            // before calling player.handleInput() method - that prevents update the
+            // player position before the check
+            let nextSquare = player.playerNextSquare(allowedKeys[e.keyCode]);
+            checkSquare(nextSquare, allRocks);
+        }
+
+        // If there is no rock in the tile the player can move in
+        if (!entityInTile) {
+            player.handleInput(allowedKeys[e.keyCode]);
+        }
+        entityInTile = false;
+    } else if (startScreen === true || characterSelect === true
+               || credits === true || gameOver === true){
+        handleInput(allowedKeys[e.keyCode]);
+    }
+});
