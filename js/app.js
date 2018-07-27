@@ -362,14 +362,19 @@ let player = new Player();
 let allCollectibles = [];
 
 // Place all rocksobjects in an array called allRocks
-let allRocks = [];
+let allRocks;
 
-// Instatiate the rocks
+// Instatiate the rocks - functionc makeRocks the total number of
+// random rocks that will be created and place them into an array
 let numRocks = 3;
-let randomXset = getX(numRocks); // Get random, not repeated, 'x' coordinates
-for (let x of randomXset) {
-    allRocks.push(new Rock(x, randomY()));
+function makeRocks(num) {
+    allRocks = [];
+    let randomXset = getX(num); // Get random, not repeated, 'x' coordinates
+    for (let x of randomXset) {
+        allRocks.push(new Rock(x, randomY()));
+    }
 }
+makeRocks(numRocks);
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
