@@ -114,16 +114,17 @@ Player.prototype.playerNextSquare = function(movement) {
 }
 
 // Check if is there is an item or an rock in the tile, if so
-// this function assigns 'true' to 'entityInTile' variable.
+// this function assigns 'true' to 'bool' variable.
 // This function is called in player.handleInput() method
 // to prevent the player of moving over the rocks,
 // and to check is there is a collectible in the tile,
 // so the player can collect it.
 // It takes two parameters:
-// The 'playerNextSquare' object that is returned by the player.playerNextSquare
-// method, and an array of entities.
-function checkSquare(playerNextSquare, arr) {
-    let playerSquare = playerNextSquare;
+// The 'nextSquare' object - that holds the data of the square the player wants
+// to move in - and an array of entities.
+function checkSquare(nextSquare, arr) {
+    let playerSquare = nextSquare;
+    let bool = false;
 
     // Check if there is an entity in the tile that the player wants to move in
     // by using 2D - collision detection algorithm
@@ -135,9 +136,10 @@ function checkSquare(playerNextSquare, arr) {
             entSquare.y < playerSquare.y + playerSquare.height &&
             entSquare.height + entSquare.y > playerSquare.y) {
 
-           entityInTile = true;
+            bool = true;
         }
     });
+    return bool;
 }
 
 // Collectible items on screen
@@ -158,13 +160,20 @@ Collectibles.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
+// This function places all Collectibles objects in an array.
+// It takes as parameters the collectible object.
+// This function is invoked by displayCollectibles() function.
+Collectibles.prototype.makeCollectibles = function() {
+    allCollectibles.push(this);
+}
+
 // OrangeGem subclass of Collectibles class
 let OrangeGem = function(x, y) {
     Collectibles.call(this, x, y);
 
     this.sprite = 'images/Gem Orange.png';
     this.score = 20;
-    this.frequency = 50;
+    this.frequency = 50; // probability of be displayed on screen
 };
 
 OrangeGem.prototype = Object.create(Collectibles.prototype);
@@ -176,7 +185,7 @@ let GreenGem = function(x, y) {
 
     this.sprite = 'images/Gem Green.png';
     this.score = 40;
-    this.frequency = 100;
+    this.frequency = 100; // probability of be displayed on screen
 };
 
 GreenGem.prototype = Object.create(Collectibles.prototype);
@@ -188,7 +197,7 @@ let BlueGem = function(x, y) {
 
     this.sprite = 'images/Gem Blue.png';
     this.score = 80;
-    this.frequency = 250;
+    this.frequency = 250; // probability of be displayed on screen
 };
 
 BlueGem.prototype = Object.create(Collectibles.prototype);
@@ -200,7 +209,7 @@ let GoldenKey = function(x, y) {
 
     this.sprite = 'images/Key.png';
     this.score = 200;
-    this.frequency = 500;
+    this.frequency = 500; // probability of be displayed on screen
 };
 
 GoldenKey.prototype = Object.create(Collectibles.prototype);
@@ -212,7 +221,7 @@ let Heart = function(x, y) {
 
     this.sprite = 'images/Heart.png';
     this.life = 1;
-    this.frequency = 500;
+    this.frequency = 500; // probability of be displayed on screen
 };
 
 Heart.prototype = Object.create(Collectibles.prototype);
@@ -361,10 +370,10 @@ let player = new Player();
 // Place all collectibles objects in an array called allCollectibles
 let allCollectibles = [];
 
-// Place all rocksobjects in an array called allRocks
+// Place all Rock objects in an array called allRocks
 let allRocks;
 
-// Instatiate the rocks - functionc makeRocks the total number of
+// Instatiate the rocks - function makeRocks gets the total number of
 // random rocks that will be created and place them into an array
 let numRocks = 3;
 function makeRocks(num) {
@@ -374,7 +383,39 @@ function makeRocks(num) {
         allRocks.push(new Rock(x, randomY()));
     }
 }
+
 makeRocks(numRocks);
+
+// Execute displayCollectibles() method every five seconds
+let intervalID = window.setInterval(displayCollectibles, 5000);
+
+// As the time passes, there is a chance of each collectible be
+// displayed on screen. This function takes the time elapsed as
+// a parameter, and calls makeCollectibles() function, depending on
+// the probability of each collectible of be displayed on screen.
+// For each collectible created, it tests if there is already a rock
+// object or a collectible in the tile.
+function displayCollectibles(count) {
+    let isRock = false;
+    let isCollectible = false;
+
+    //if (count % 10  === 0) {
+        let orangeGem = new OrangeGem(randomX(), randomY());
+        //console.log("I' listening!");
+
+        isCollectible = checkSquare(orangeGem, allCollectibles);
+        //console.log("");
+        isRock = checkSquare(orangeGem, allRocks);
+        //console.log("I' listening!");
+
+        if (!isCollectible && !isRock) {
+            orangeGem.makeCollectibles();
+        }
+
+        isCollectible = false;
+        isRock = false;
+    //}
+}
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
@@ -405,7 +446,7 @@ document.addEventListener('keyup', function(e) {
             // before calling player.handleInput() method - that prevents update the
             // player position before the check
             let nextSquare = player.playerNextSquare(allowedKeys[e.keyCode]);
-            checkSquare(nextSquare, allRocks);
+            entityInTile = checkSquare(nextSquare, allRocks);
         }
 
         // If there is no rock in the tile the player can move in
