@@ -463,12 +463,20 @@ var Engine = (function(global) {
          * the render function you have defined.
          */
 
-        allCollectibles.forEach(function(collectible) {
-            collectible.render();
+        // Fix Collectibles objects and Rock objects overlap correctly on screen
+        const items = allCollectibles.concat(allRocks);
+        items.sort(function itemsRenderingOrder(itemA, itemB) {
+            if (itemA.x + itemA.y < itemB.x + itemB.y) {
+                return -1;
+            }
+            if (itemA.x + itemA.y > itemB.x + itemB.y) {
+                return 1;
+            }
+            return 0;
         });
 
-        allRocks.forEach(function(rock) {
-            rock.render();
+        items.forEach(function(item) {
+            item.render();
         });
 
         allEnemies.forEach(function(enemy) {
