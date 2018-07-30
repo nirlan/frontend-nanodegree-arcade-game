@@ -44,7 +44,7 @@ var Engine = (function(global) {
         count = 0,
         seconds = 0,
         minutes = 0,
-        timeString = '', // Time string with two digits format (MM:SS)
+        timeString = '00:00', // Time string with two digits format (MM:SS)
 
         lastTime,
         now,
@@ -201,7 +201,7 @@ var Engine = (function(global) {
     function update(dt) {
         updateEntities(dt);
         checkCollisions();
-        counter();
+        //counter();
     }
 
     /* This is called by the update function and loops through all of the
@@ -246,34 +246,38 @@ var Engine = (function(global) {
         });
     }
 
+    let setIntervalID = window.setInterval(counter, 1000);
+
     // A counter for the game
     function counter() {
-        const t0 = Math.floor(lastTime/1000);
-        const t1 = Math.floor(now/1000);
-
-        if (t0 !== t1) {
+        if (gameplay) {
             count++;
             seconds++;
-        }
 
-        if (seconds === 60) {
-            minutes++;
+            if (seconds === 60) {
+                minutes++;
+                seconds = 0;
+            }
+
+            let twoDigMinutes = function() {
+                return (minutes === 0) ? '00'
+                    : (minutes < 10) ? `0${minutes}`
+                    :                  `${minutes}`;
+            };
+
+            let twoDigSeconds = function() {
+                return (seconds === 0) ? '00'
+                    : (seconds < 10) ? `0${seconds}`
+                    :                  `${seconds}`;
+            };
+
+            timeString = `${twoDigMinutes()}:${twoDigSeconds()}`;
+
+        } else {
+            count = 0;
             seconds = 0;
+            minutes = 0;
         }
-
-        let twoDigMinutes = function() {
-            return (minutes === 0) ? '00'
-                : (minutes < 10) ? `0${minutes}`
-                :                  `${minutes}`;
-        };
-
-        let twoDigSeconds = function() {
-            return (seconds === 0) ? '00'
-                : (seconds < 10) ? `0${seconds}`
-                :                  `${seconds}`;
-        };
-
-        timeString = `${twoDigMinutes()}:${twoDigSeconds()}`;
     }
 
     // Update the start screen

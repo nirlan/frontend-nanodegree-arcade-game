@@ -150,6 +150,14 @@ let Collectibles = function(x, y){
     this.count = 10;
 };
 
+// This static method places Collectibles objects in an array.
+// It takes as parameters the collectible object.
+// This method is invoked by displayCollectibles() function.
+Collectibles.addCollectibles = function(collectible) {
+    this.collectible = collectible;
+    allCollectibles.push(collectible);
+}
+
 // Update displayed items on screen
 Collectibles.prototype.update = function(dt) {
 
@@ -159,13 +167,6 @@ Collectibles.prototype.update = function(dt) {
 Collectibles.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
-
-// This function places all Collectibles objects in an array.
-// It takes as parameters the collectible object.
-// This function is invoked by displayCollectibles() function.
-Collectibles.prototype.makeCollectibles = function() {
-    allCollectibles.push(this);
-}
 
 // OrangeGem subclass of Collectibles class
 let OrangeGem = function(x, y) {
@@ -391,7 +392,7 @@ let intervalID = window.setInterval(displayCollectibles, 5000);
 
 // As the time passes, there is a chance of each collectible be
 // displayed on screen. This function takes the time elapsed as
-// a parameter, and calls makeCollectibles() function, depending on
+// a parameter, and calls addCollectibles() function, depending on
 // the probability of each collectible of be displayed on screen.
 // For each collectible created, it tests if there is already a rock
 // object or a collectible in the tile.
@@ -409,7 +410,7 @@ function displayCollectibles(count) {
         //console.log("I' listening!");
 
         if (!isCollectible && !isRock) {
-            orangeGem.makeCollectibles();
+            Collectibles.addCollectibles(orangeGem);
         }
 
         isCollectible = false;
