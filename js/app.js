@@ -158,6 +158,45 @@ Collectibles.addCollectibles = function(collectible) {
     allCollectibles.push(collectible);
 }
 
+// Remove the earlier Collectibles object
+// from the screen. This method is called 10 seconds after
+// the object has been displayed.
+Collectibles.removeCollectibles = function() {
+    allCollectibles.shift();
+}
+
+// Get a random Collectibles object and return it. This method is invoked by
+// displayCollectibles() function.
+// Each Collectibles object has a probability of being displayed on screen.
+Collectibles.getCollectibles = function() {
+    let index = getRandomInt(10);
+    let collectible;
+
+    switch (index) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+            collectible = new OrangeGem(randomX(), randomY());
+            break;
+        case 5:
+        case 6:
+            collectible = new GreenGem(randomX(), randomY());
+            break;
+        case 7:
+        collectible = new BlueGem(randomX(), randomY());
+            break;
+        case 8:
+        collectible = new GoldenKey(randomX(), randomY()+15);
+            break;
+        case 9:
+        collectible = new Heart(randomX(), randomY()+15);
+    }
+
+    return collectible;
+}
+
 // Update displayed items on screen
 Collectibles.prototype.update = function(dt) {
 
@@ -168,13 +207,21 @@ Collectibles.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
+// Get Collectible object square - this data is used to calculate if
+// the player is in the same square of the collectible, and to avoid
+// rendering 2 collectibles in the same tile, or in a rock tile.
+Collectibles.prototype.collectiblesSquare = function() {
+    const collSquare = {x: this.x, y: this.y + 75, width: 100, height: 75};
+    return collSquare;
+};
+
 // OrangeGem subclass of Collectibles class
 let OrangeGem = function(x, y) {
     Collectibles.call(this, x, y);
 
     this.sprite = 'images/Gem Orange.png';
     this.score = 20;
-    this.frequency = 50; // probability of be displayed on screen
+    this.frequency = 0.5; // probability of be displayed on screen - 50%
 };
 
 OrangeGem.prototype = Object.create(Collectibles.prototype);
@@ -186,7 +233,7 @@ let GreenGem = function(x, y) {
 
     this.sprite = 'images/Gem Green.png';
     this.score = 40;
-    this.frequency = 100; // probability of be displayed on screen
+    this.frequency = 0.2; // probability of be displayed on screen - 20%
 };
 
 GreenGem.prototype = Object.create(Collectibles.prototype);
@@ -198,7 +245,7 @@ let BlueGem = function(x, y) {
 
     this.sprite = 'images/Gem Blue.png';
     this.score = 80;
-    this.frequency = 250; // probability of be displayed on screen
+    this.frequency = 0.2; // probability of be displayed on screen - 10%
 };
 
 BlueGem.prototype = Object.create(Collectibles.prototype);
@@ -210,7 +257,7 @@ let GoldenKey = function(x, y) {
 
     this.sprite = 'images/Key.png';
     this.score = 200;
-    this.frequency = 500; // probability of be displayed on screen
+    this.frequency = 0.10; // probability of be displayed on screen - 10%
 };
 
 GoldenKey.prototype = Object.create(Collectibles.prototype);
@@ -222,7 +269,7 @@ let Heart = function(x, y) {
 
     this.sprite = 'images/Heart.png';
     this.life = 1;
-    this.frequency = 500; // probability of be displayed on screen
+    this.frequency = 0.10; // probability of be displayed on screen - 10%
 };
 
 Heart.prototype = Object.create(Collectibles.prototype);
@@ -387,36 +434,39 @@ function makeRocks(num) {
 
 makeRocks(numRocks);
 
-// Execute displayCollectibles() method every five seconds
-let intervalID = window.setInterval(displayCollectibles, 5000);
-
 // As the time passes, there is a chance of each collectible be
 // displayed on screen. This function takes the time elapsed as
-// a parameter, and calls addCollectibles() function, depending on
-// the probability of each collectible of be displayed on screen.
+// a parameter (count) to remove the Collectibles objects from the
+// screen periodically, and calls addCollectibles() function that
+// display new Collectibles objects.
 // For each collectible created, it tests if there is already a rock
-// object or a collectible in the tile.
-function displayCollectibles(count) {
-    let isRock = false;
-    let isCollectible = false;
+// object or a collectible in the tile. This function is invoked every
+// 5000ms.
+let displayCollectibles = function(count) {
+    if (gameplay) {
+        let coll = Collectibles.getCollectibles();
+        let collSquare = coll.collectiblesSquare();
 
-    //if (count % 10  === 0) {
-        let orangeGem = new OrangeGem(randomX(), randomY());
-        //console.log("I' listening!");
+        let isRock = checkSquare(collSquare, allRocks);
 
-        isCollectible = checkSquare(orangeGem, allCollectibles);
-        //console.log("");
-        isRock = checkSquare(orangeGem, allRocks);
-        //console.log("I' listening!");
+        let isCollectible = checkSquare(collSquare, allCollectibles);
 
-        if (!isCollectible && !isRock) {
-            Collectibles.addCollectibles(orangeGem);
+        // Test if there is already a Rock object or another Collectible object
+        // in the tile that the new Collectibles object will be displayed.
+        // The maximum number of Collectibles displayed at the same time is 3.
+        if (isCollectible === false && isRock === false && allCollectibles.length < 3) {
+            Collectibles.addCollectibles(coll);
+        }
+        // Remove the earlier Collectible from the array if 'i' index
+        // is multiple of 3, and the array has at least one element.
+        if (count % 3 === 0 && allCollectibles.length >= 1) {
+            Collectibles.removeCollectibles();
         }
 
         isCollectible = false;
         isRock = false;
-    //}
-}
+    }
+};
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.

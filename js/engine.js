@@ -201,7 +201,6 @@ var Engine = (function(global) {
     function update(dt) {
         updateEntities(dt);
         checkCollisions();
-        //counter();
     }
 
     /* This is called by the update function and loops through all of the
@@ -246,9 +245,11 @@ var Engine = (function(global) {
         });
     }
 
-    let setIntervalID = window.setInterval(counter, 1000);
+    // Call counter() every 1000ms
+    let setCounterIntervalID = window.setInterval(counter, 1000);
 
     // A counter for the game
+    // Set 'timeString' variable - it is displayed as a counter on screen
     function counter() {
         if (gameplay) {
             count++;
@@ -449,6 +450,9 @@ var Engine = (function(global) {
         renderEntities();
         drawScore();
     }
+
+    // Execute displayCollectibles() method every five seconds if gameplay is 'true'
+    let collectIntervalID = window.setInterval(function() {displayCollectibles(count)}, 5000);
 
     /* This function is called by the render function and is called on each game
      * tick. Its purpose is to then call the render functions you have defined
