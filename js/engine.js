@@ -452,7 +452,8 @@ var Engine = (function(global) {
     }
 
     // Execute displayCollectibles() method every five seconds if gameplay is 'true'
-    let collectIntervalID = window.setInterval(function() {displayCollectibles(count)}, 5000);
+    let collectIntervalID = window.setInterval(function() {
+        displayCollectibles(count)}, 5000);
 
     /* This function is called by the render function and is called on each game
      * tick. Its purpose is to then call the render functions you have defined

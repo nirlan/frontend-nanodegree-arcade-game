@@ -113,6 +113,21 @@ Player.prototype.playerNextSquare = function(movement) {
     return playerNextSquare;
 }
 
+
+// Get object square - this data is used to calculate if
+// the player is in the same square of the collectible, and to avoid
+// rendering 2 collectibles in the same tile, or in a rock tile.
+// It used to calculate if there is another object in the same tile.
+let getSquare = function() {
+    let collSquare = {x: this.x, y: this.y + 75, width: 100, height: 75};
+
+    if (this instanceof Heart || this instanceof GoldenKey) {
+        collSquare = {x: this.x, y: this.y + 60, width: 100, height: 75};
+    }
+
+    return collSquare;
+};
+
 // Check if is there is an item or an rock in the tile, if so
 // this function assigns 'true' to 'bool' variable.
 // This function is called in player.handleInput() method
@@ -122,24 +137,29 @@ Player.prototype.playerNextSquare = function(movement) {
 // It takes two parameters:
 // The 'nextSquare' object - that holds the data of the square the player wants
 // to move in - and an array of entities.
-function checkSquare(nextSquare, arr) {
+function checkSquare(nextSquare, entities) {
     let playerSquare = nextSquare;
-    let bool = false;
+    let entity;
+    let i = 0;
 
     // Check if there is an entity in the tile that the player wants to move in
     // by using 2D - collision detection algorithm
-    arr.forEach(function(ent) {
-        const entSquare = {x: ent.x, y: ent.y + 75, width: 100, height: 75};
+    for (let ent of entities) {
+    //arr.forEach(function(ent) {
+
+        let entSquare = getSquare.call(ent);
 
         if (entSquare.x < playerSquare.x + playerSquare.width &&
             entSquare.x + entSquare.width > playerSquare.x &&
             entSquare.y < playerSquare.y + playerSquare.height &&
             entSquare.height + entSquare.y > playerSquare.y) {
 
-            bool = true;
+            entity = {item: ent, itemSquare: entSquare, ind: i};
+            i++;
         }
-    });
-    return bool;
+    }
+    //});
+    return entity;
 }
 
 // Collectible items on screen
@@ -161,8 +181,12 @@ Collectibles.addCollectibles = function(collectible) {
 // Remove the earlier Collectibles object
 // from the screen. This method is called 10 seconds after
 // the object has been displayed.
-Collectibles.removeCollectibles = function() {
-    allCollectibles.shift();
+Collectibles.removeCollectibles = function(index) {
+    if (index) {
+        allCollectibles.splice(index, 1);
+    } else {
+        allCollectibles.shift();
+    }
 }
 
 // Get a random Collectibles object and return it. This method is invoked by
@@ -205,14 +229,6 @@ Collectibles.prototype.update = function(dt) {
 // Draw the items
 Collectibles.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-};
-
-// Get Collectible object square - this data is used to calculate if
-// the player is in the same square of the collectible, and to avoid
-// rendering 2 collectibles in the same tile, or in a rock tile.
-Collectibles.prototype.collectiblesSquare = function() {
-    const collSquare = {x: this.x, y: this.y + 75, width: 100, height: 75};
-    return collSquare;
 };
 
 // OrangeGem subclass of Collectibles class
@@ -327,8 +343,9 @@ let transRight = false; // Transitioning right on character selection
 let transX = 202; // Initial X coordinate value for character tranaitioning
                   // on Character selection screen
 
-// This variable holds the value returned by player.someEntityInTile() method
-let entityInTile = false;
+// This variable holds the value returned by
+let rockInTile = false;
+let collectibleInTile;
 
 
 // This method handle the user's inputs fom the keyboard when the Game screen
@@ -444,17 +461,21 @@ makeRocks(numRocks);
 // 5000ms.
 let displayCollectibles = function(count) {
     if (gameplay) {
+        // Get a new random Collectibles object
         let coll = Collectibles.getCollectibles();
-        let collSquare = coll.collectiblesSquare();
-
+        // Get the square of the Collectibles object
+        // It used to calculate if there is another object in the same tile
+        let collSquare = getSquare.call(coll);
+        console.log(collSquare);
+        // Check if there is a Rock in the same tile
         let isRock = checkSquare(collSquare, allRocks);
-
+        // Check if there is another Collectibles object in the same tile
         let isCollectible = checkSquare(collSquare, allCollectibles);
 
         // Test if there is already a Rock object or another Collectible object
         // in the tile that the new Collectibles object will be displayed.
         // The maximum number of Collectibles displayed at the same time is 3.
-        if (isCollectible === false && isRock === false && allCollectibles.length < 3) {
+        if (!isCollectible && !isRock && allCollectibles.length < 3) {
             Collectibles.addCollectibles(coll);
         }
         // Remove the earlier Collectible from the array if 'i' index
@@ -462,9 +483,6 @@ let displayCollectibles = function(count) {
         if (count % 3 === 0 && allCollectibles.length >= 1) {
             Collectibles.removeCollectibles();
         }
-
-        isCollectible = false;
-        isRock = false;
     }
 };
 
@@ -497,14 +515,26 @@ document.addEventListener('keyup', function(e) {
             // before calling player.handleInput() method - that prevents update the
             // player position before the check
             let nextSquare = player.playerNextSquare(allowedKeys[e.keyCode]);
-            entityInTile = checkSquare(nextSquare, allRocks);
+            rockInTile = checkSquare(nextSquare, allRocks);
+            collectibleInTile = checkSquare(nextSquare, allCollectibles);
         }
 
         // If there is no rock in the tile the player can move in
-        if (!entityInTile) {
+        if (!rockInTile) {
+            // If there is a collectible, collect it
+            if (collectibleInTile) {
+                if (collectibleInTile.item.score) {
+                    player.score += collectibleInTile.item.score;
+                // Heart objects doesn't have 'score' property.
+                // If score property of the object returns are falsy
+                // the player's lives is updated
+                } else {
+                    player.lives < 3 ? player.lives += 1 : player.lives;
+                }
+                Collectibles.removeCollectibles(collectibleInTile.ind);
+            }
             player.handleInput(allowedKeys[e.keyCode]);
         }
-        entityInTile = false;
     } else if (startScreen === true || characterSelect === true
                || credits === true || gameOver === true){
         handleInput(allowedKeys[e.keyCode]);
