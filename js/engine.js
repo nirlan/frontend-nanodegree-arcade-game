@@ -88,23 +88,12 @@ var Engine = (function(global) {
         if (characterSelect === true) {
             updateChaSelScreen();
             renderChaSelScreen(dt);
-
-            // Select player's character
-            if (enterKey === true || spaceKey === true) {
-                player.sprite = rowCharacters[char];
-
-                enterKey = false;
-                spaceKey = false;
-                startScreen = false;
-                characterSelect = false;
-                gameplay = true;
-            }
         }
 
         // After the new game button is pressed, the gameplay variable is
         // assigned to 'true' and the Game screen is displayed as long as
         // the player's lives is different from zero
-        if (gameplay === true && gameOver === false) {
+        if (gameplay === true) {
             update(dt);
             render();
         }
@@ -113,58 +102,31 @@ var Engine = (function(global) {
         if (credits === true) {
             updateCreditScreen(dt);
             renderCreditScreen();
-
-            // Exits Credit screen if the user hits 'enter' or 'space' keys
-            if (enterKey === true || spaceKey === true) {
-                enterKey = false;
-                spaceKey = false;
-                credits = false;
-                startScreen = true;
-            }
         }
 
-        // If 'enter' or 'space' keys are pressed, the Start screen animation
-        // frame stops
-        // If the New Game button was glowing - colorArr[0] !== "#436ba8 -
-        // the game starts
-        if ((enterKey === true || spaceKey === true) && colorArr[0] !== "#436ba8"
-            && gameOver === false) {
-            enterKey = false;
-            spaceKey = false;
-            startScreen = false;
-            characterSelect = true;
-        }
 
-        // If the Credits button was glowing instead - colorArr[0] === "#436ba8 -
-        // the credits variable is assigned to 'true', and hence the Credits
-        // screen is displayed
-        else if ((enterKey === true || spaceKey === true) && colorArr[0] === "#436ba8"
-                   && credits === false) {
-            enterKey = false;
-            spaceKey = false;
-            startScreen = false;
-            credits = true;
-        }
-
-        // When the player's lives reaches zero, the Game Over screen is
+        // If the player's lives reaches zero or time is over, the Game Over screen is
         // displayed
-        if (player.lives === 0) {
+        if (player.lives === 0 || count === 120) {
             gameplay = false;
             gameOver = true;
-            player = new Player();
-            makeRocks(numRocks);
         }
 
         if (gameOver === true) {
-            updateGameOverScreen(dt);
+            updateGameOverScreen();
             renderGameOverScreen();
         }
 
-        if ((enterKey === true || spaceKey === true) && gameOver === true) {
-                enterKey = false;
-                spaceKey = false;
-                gameOver = false;
-                startScreen = true;
+
+        // If the player gets 1500 points the game is won
+        if (player.score >= 100) {
+            gameplay = false;
+            winScreen = true;
+        }
+
+        if (winScreen === true) {
+            updateWinScreen();
+            renderYouWinScreen();
         }
 
         /* Set our lastTime variable which is used to determine the time delta
@@ -334,6 +296,27 @@ var Engine = (function(global) {
             rightKey = false;
             i++;
         }
+
+        // If 'enter' or 'space' keys are pressed, the Start screen animation
+        // frame stops
+        // If the New Game button was glowing - colorArr[0] !== "#436ba8 -
+        // the game starts
+        if ((enterKey === true || spaceKey === true) && colorArr[0] !== "#436ba8") {
+            enterKey = false;
+            spaceKey = false;
+            startScreen = false;
+            characterSelect = true;
+        }
+
+        // If the Credits button was glowing instead - colorArr[0] === "#436ba8 -
+        // the credits variable is assigned to 'true', and hence the Credits
+        // screen is displayed
+        else if ((enterKey === true || spaceKey === true) && colorArr[0] === "#436ba8") {
+            enterKey = false;
+            spaceKey = false;
+            startScreen = false;
+            credits = true;
+        }
     }
 
     // Update Character Selection screen
@@ -354,6 +337,17 @@ var Engine = (function(global) {
             && transRight === false) {
             rightKey = false;
             transRight = true;
+        }
+
+        // Select player's character
+        if (enterKey === true || spaceKey === true) {
+            player.sprite = rowCharacters[char];
+
+            enterKey = false;
+            spaceKey = false;
+            startScreen = false;
+            characterSelect = false;
+            gameplay = true;
         }
     }
 
@@ -398,11 +392,37 @@ var Engine = (function(global) {
     // Update credits screen
     function updateCreditScreen(dt) {
 
+        // Exits Credit screen if the user hits 'enter' or 'space' keys
+        if (enterKey === true || spaceKey === true) {
+            enterKey = false;
+            spaceKey = false;
+            credits = false;
+            startScreen = true;
+        }
     }
 
     // Update game over screen
-    function updateGameOverScreen(dt) {
+    function updateGameOverScreen() {
+        // Hit enter or soace to restart the game
+        if (enterKey === true || spaceKey === true) {
+            reset();
+            enterKey = false;
+            spaceKey = false;
+            gameOver = false;
+            startScreen = true;
+        }
+    }
 
+    // Update Win Screen
+    function updateWinScreen() {
+        // Hit enter or space to restart the game
+        if (enterKey === true || spaceKey === true) {
+            reset();
+            enterKey = false;
+            spaceKey = false;
+            winScreen = false;
+            startScreen = true;
+        }
     }
 
     /* This function initially draws the "game level", it will then call
@@ -629,12 +649,28 @@ var Engine = (function(global) {
         ctx.fillText('TRY AGAIN!', 10, 300);
     }
 
+    // Render the You Win screen
+    function renderYouWinScreen() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+
+        ctx.font = "58px Gaegu";
+        ctx.fillStyle = "#436ba8";
+        ctx.textBaseline = "hanging";
+        ctx.fillText('CONGRATULATIONS', 5, 200);
+
+        ctx.font = "48px Gaegu";
+        ctx.fillText('YOU WIN!', 140, 300);
+    }
+
     /* This function does nothing but it could have been a good place to
      * handle game reset states - maybe a new game menu or a game over screen
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-
+        allCollectibles = [];
+        makeRocks(3);
+        makeEnemies();
+        player = new Player();
     }
 
     /* Go ahead and load all of the images we know we're going to need to

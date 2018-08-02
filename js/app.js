@@ -49,7 +49,7 @@ let Player = function() {
     // this.speed = 100; // Player transition speed
 };
 
-// Required method for the game
+// Update the player position on screen
 Player.prototype.update = function() {
 
 };
@@ -336,6 +336,9 @@ let credits = false;
 // Controls if the Game Over screen is the current screen
 let gameOver = false;
 
+// Controls if the Win Screen is the current screen
+let winScreen = false;
+
 // This variables helps trasitioning elements
 let transition = false; // Transitioning player during gameplay
 let transLeft = false; // Transitioning left on character selection
@@ -424,9 +427,12 @@ let speedGen = () => 80 + Math.random()*200;
 let allEnemies = [];
 
 // Instantiating all enemy objects
-allEnemies.push(new Enemy(-101, 63, speedGen()));
-allEnemies.push(new Enemy(-101, 146, speedGen()));
-allEnemies.push(new Enemy(-101, 229, speedGen()));
+function makeEnemies() {
+    allEnemies = [];
+    allEnemies.push(new Enemy(-101, 63, speedGen()));
+    allEnemies.push(new Enemy(-101, 146, speedGen()));
+    allEnemies.push(new Enemy(-101, 229, speedGen()));
+}
 
 // Place the player object in a variable called player
 // Instantiate the player object
@@ -440,7 +446,6 @@ let allRocks;
 
 // Instatiate the rocks - function makeRocks gets the total number of
 // random rocks that will be created and place them into an array
-let numRocks = 3;
 function makeRocks(num) {
     allRocks = [];
     let randomXset = getX(num); // Get random, not repeated, 'x' coordinates
@@ -448,8 +453,6 @@ function makeRocks(num) {
         allRocks.push(new Rock(x, randomY()));
     }
 }
-
-makeRocks(numRocks);
 
 // As the time passes, there is a chance of each collectible be
 // displayed on screen. This function takes the time elapsed as
@@ -536,7 +539,7 @@ document.addEventListener('keyup', function(e) {
             player.handleInput(allowedKeys[e.keyCode]);
         }
     } else if (startScreen === true || characterSelect === true
-               || credits === true || gameOver === true){
+               || credits === true || gameOver === true || winScreen === true) {
         handleInput(allowedKeys[e.keyCode]);
     }
 });
