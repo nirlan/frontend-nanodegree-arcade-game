@@ -49,11 +49,6 @@ let Player = function() {
     // this.speed = 100; // Player transition speed
 };
 
-// Update the player position on screen
-Player.prototype.update = function() {
-
-};
-
 // Draw the player on the screen
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
@@ -72,7 +67,7 @@ Player.prototype.handleInput = function(movement) {
             if (this.y >= 83) {
                 this.y -= 83;
 
-            // The player gets to the river, it returns to the initial position
+            // If player gets to the river, it returns to the initial position
             // and the score is updated
             } else {
                 this.score+=10;
@@ -92,7 +87,7 @@ Player.prototype.handleInput = function(movement) {
 
 // Get the player inputs and calculate the square that the player wants to move in
 // This functions returns an object that represents that square
-// The object returnes is used by checkSquare() function
+// The returned object is used by checkSquare() function
 Player.prototype.playerNextSquare = function(movement) {
     let playerNextSquare;
 
@@ -111,55 +106,6 @@ Player.prototype.playerNextSquare = function(movement) {
     }
 
     return playerNextSquare;
-}
-
-
-// Get object square - this data is used to calculate if
-// the player is in the same square of the collectible, and to avoid
-// rendering 2 collectibles in the same tile, or in a rock tile.
-// It used to calculate if there is another object in the same tile.
-let getSquare = function() {
-    let collSquare = {x: this.x, y: this.y + 75, width: 100, height: 75};
-
-    if (this instanceof Heart || this instanceof GoldenKey) {
-        collSquare = {x: this.x, y: this.y + 60, width: 100, height: 75};
-    }
-
-    return collSquare;
-};
-
-// Check if is there is an item or an rock in the tile, if so
-// this function assigns 'true' to 'bool' variable.
-// This function is called in player.handleInput() method
-// to prevent the player of moving over the rocks,
-// and to check is there is a collectible in the tile,
-// so the player can collect it.
-// It takes two parameters:
-// The 'nextSquare' object - that holds the data of the square the player wants
-// to move in - and an array of entities.
-function checkSquare(nextSquare, entities) {
-    let playerSquare = nextSquare;
-    let entity;
-    let i = 0;
-
-    // Check if there is an entity in the tile that the player wants to move in
-    // by using 2D - collision detection algorithm
-    for (let ent of entities) {
-    //arr.forEach(function(ent) {
-
-        let entSquare = getSquare.call(ent);
-
-        if (entSquare.x < playerSquare.x + playerSquare.width &&
-            entSquare.x + entSquare.width > playerSquare.x &&
-            entSquare.y < playerSquare.y + playerSquare.height &&
-            entSquare.height + entSquare.y > playerSquare.y) {
-
-            entity = {item: ent, itemSquare: entSquare, ind: i};
-            i++;
-        }
-    }
-    //});
-    return entity;
 }
 
 // Collectible items on screen
@@ -220,11 +166,6 @@ Collectibles.getCollectibles = function() {
 
     return collectible;
 }
-
-// Update displayed items on screen
-Collectibles.prototype.update = function(dt) {
-
-};
 
 // Draw the items
 Collectibles.prototype.render = function() {
@@ -454,6 +395,58 @@ function makeRocks(num) {
     }
 }
 
+// Get object square - this data is used to calculate if
+// the player is in the same square of the collectible, and to avoid
+// rendering 2 collectibles in the same tile, or in a rock tile.
+// It used to calculate if there is another object in the same tile.
+let getSquare = function() {
+    let square = {x: this.x, y: this.y + 75, width: 100, height: 75};
+
+    if (this instanceof Heart || this instanceof GoldenKey) {
+        square = {x: this.x, y: this.y + 60, width: 100, height: 75};
+    }
+
+    if (this instanceof Player) {
+        square = {x: this.x + 35, y: this.y + 75, width: 49, height: 67};
+    }
+
+    return square;
+};
+
+// Check if is there is an item or an rock in the tile, if so
+// this function assigns 'true' to 'bool' variable.
+// This function is called in player.handleInput() method
+// to prevent the player of moving over the rocks,
+// and to check is there is a collectible in the tile,
+// so the player can collect it.
+// It takes two parameters:
+// The 'nextSquare' object - that holds the data of the square the player wants
+// to move in - and an array of entities.
+function checkSquare(nextSquare, entities) {
+    let playerSquare = nextSquare;
+    let entity;
+    let i = 0;
+
+    // Check if there is an entity in the tile that the player wants to move in
+    // by using 2D - collision detection algorithm
+    for (let ent of entities) {
+    //arr.forEach(function(ent) {
+
+        const entSquare = getSquare.call(ent);
+
+        if (entSquare.x < playerSquare.x + playerSquare.width &&
+            entSquare.x + entSquare.width > playerSquare.x &&
+            entSquare.y < playerSquare.y + playerSquare.height &&
+            entSquare.height + entSquare.y > playerSquare.y) {
+
+            entity = {item: ent, itemSquare: entSquare, ind: i};
+            i++;
+        }
+    }
+    //});
+    return entity;
+}
+
 // As the time passes, there is a chance of each collectible be
 // displayed on screen. This function takes the time elapsed as
 // a parameter (count) to remove the Collectibles objects from the
@@ -464,21 +457,30 @@ function makeRocks(num) {
 // 5000ms.
 let displayCollectibles = function(count) {
     if (gameplay) {
-        // Get a new random Collectibles object
-        let coll = Collectibles.getCollectibles();
-        // Get the square of the Collectibles object
-        // It used to calculate if there is another object in the same tile
-        let collSquare = getSquare.call(coll);
-        console.log(collSquare);
-        // Check if there is a Rock in the same tile
-        let isRock = checkSquare(collSquare, allRocks);
-        // Check if there is another Collectibles object in the same tile
-        let isCollectible = checkSquare(collSquare, allCollectibles);
+        let coll;
+        let collSquare;
+        let isRock = true;
+        let isCollectible = true;
+        let isPlayer = true;
 
-        // Test if there is already a Rock object or another Collectible object
+        // Test if there is already a Rock, a Collectible or the Player
         // in the tile that the new Collectibles object will be displayed.
+        do {
+            // Get a new random Collectibles object
+            coll = Collectibles.getCollectibles();
+            // Get the square of the Collectibles object
+            // It used to calculate if there is another object in the same tile
+            collSquare = getSquare.call(coll);
+            // Check if there is a Rock in the same tile
+            isRock = checkSquare(collSquare, allRocks);
+            // Check if there is another Collectibles object in the same tile
+            isCollectible = checkSquare(collSquare, allCollectibles);
+            // Check if the player is already in the tile
+            isPlayer = checkSquare(collSquare, [player]);
+        } while (isCollectible || isRock || isPlayer);
+
         // The maximum number of Collectibles displayed at the same time is 3.
-        if (!isCollectible && !isRock && allCollectibles.length < 3) {
+        if (allCollectibles.length < 3) {
             Collectibles.addCollectibles(coll);
         }
         // Remove the earlier Collectible from the array if 'i' index

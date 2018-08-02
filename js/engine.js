@@ -105,8 +105,8 @@ var Engine = (function(global) {
         }
 
 
-        // If the player's lives reaches zero or time is over, the Game Over screen is
-        // displayed
+        // If the player's lives reaches zero or time is over (2min max.), 
+        // the Game Over screen is displayed
         if (player.lives === 0 || count === 120) {
             gameplay = false;
             gameOver = true;
@@ -118,8 +118,8 @@ var Engine = (function(global) {
         }
 
 
-        // If the player gets 1500 points the game is won
-        if (player.score >= 100) {
+        // If the player gets 1000 points the game is won
+        if (player.score >= 1000) {
             gameplay = false;
             winScreen = true;
         }
@@ -175,23 +175,17 @@ var Engine = (function(global) {
     function updateEntities(dt) {
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
-        });
-
-        player.update();
-
-        allCollectibles.forEach(function(collectible) {
-            collectible.update(dt);
-        });
+        });              
     }
 
     // This function implements collision detection on entities,
     // if the player collides, the lives are updated and it returns to
     // the initial position
     function checkCollisions() {
-        const playerSquare = {x: player.x + 35, y: player.y + 75, width: 49, height: 67};
+        const playerSquare = getSquare.call(player);
 
-        allEnemies.forEach(function(enemy) {
-            const enemySquare = {x: Math.floor(enemy.x), y: enemy.y + 75, width: 100, height: 75};
+        for (let enemy of allEnemies) {
+            const enemySquare = getSquare.call(enemy);
 
             // Thanks to MDN! - 2D collision detection algorithm
             // https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
@@ -204,7 +198,7 @@ var Engine = (function(global) {
                 player.y = 390;
                 player.lives--;
             }
-        });
+        }
     }
 
     // Call counter() every 1000ms
@@ -474,7 +468,7 @@ var Engine = (function(global) {
     // Execute displayCollectibles() method every five seconds if gameplay is 'true'
     let collectIntervalID = window.setInterval(function() {
         displayCollectibles(count)}, 5000);
-
+    
     /* This function is called by the render function and is called on each game
      * tick. Its purpose is to then call the render functions you have defined
      * on your enemy and player entities within app.js
@@ -643,10 +637,10 @@ var Engine = (function(global) {
         ctx.font = "68px Gaegu";
         ctx.fillStyle = "#436ba8";
         ctx.textBaseline = "hanging";
-        ctx.fillText('GAME OVER', 10, 200);
+        ctx.fillText('GAME OVER', 50, 200);
 
         ctx.font = "48px Gaegu";
-        ctx.fillText('TRY AGAIN!', 10, 300);
+        ctx.fillText('TRY AGAIN!', 100, 300);
     }
 
     // Render the You Win screen
