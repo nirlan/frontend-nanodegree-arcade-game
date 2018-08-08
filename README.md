@@ -1,6 +1,22 @@
-frontend-nanodegree-arcade-game
-===============================
+# Get to the River
+## Udacity Frontend Nanodegree Arcade Game
+==================================
 
-Students should use this [rubric](https://review.udacity.com/#!/projects/2696458597/rubric) for self-checking their submission. Make sure the functions you write are **object-oriented** - either class functions (like Player and Enemy) or class prototype functions such as Enemy.prototype.checkCollisions, and that the keyword 'this' is used appropriately within your class and class prototype functions to refer to the object the function is called upon. Also be sure that the **readme.md** file is updated with your instructions on both how to 1. Run and 2. Play your arcade game.
+This is a Frogger-like browser game implemented in Javascript.
 
-For detailed instructions on how to get started, check out this [guide](https://docs.google.com/document/d/1v01aScPjSWCCWQLIpFqvg3-vXLH2e8_SZQKC8jNO0Dc/pub?embedded=true).
+# Getting Started
+- download the files and save it on a local folder
+- open index.html in a web browser
+
+# How the game works?
+In this game you have a Player, Enemies (Bugs), and Collectibles. The goal of the player is to reach the water as many times as possible, without colliding into any one of the enemies, straying from the stones on the way, and collecting items in the meanwhile. The player starts with 3 lives and 0 Score points. Each time the player gets to the river, it socres 10 points. There are 5 types of Collectibles: _Orange Gems, Green Gems, Blue Gems, Golden Keys, and Hearts_. The player gains different scores depending on the item that is collected:
+- Orange Gem scores 20 points
+- Green Gem scores 40 points
+- Blue Gem scores 80 points
+- Golden Keys scores 200 points
+- Heart increases player life by one
+
+The player can move left, right, up and down. The enemies move in varying speeds on the paved block portion of the scene. Once a the player collides with an enemy, the player loses one life, and it moves back to the start square. Once the player reaches 1000 Score points in less than 2 minutes, the game is won. If the player loses all its lives, or the game counter reaches 2 minutes, the game is over.
+
+# License
+This project is licensed under the MIT License - see the LICENSE file for details.
